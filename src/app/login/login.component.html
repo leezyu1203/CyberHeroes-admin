@@ -1,0 +1,28 @@
+<div class="max-w-sm min-h-screen flex justify-content-center align-items-center bg-green-50">
+    <p-card>
+        <ng-template #title>
+            <div class="text-3xl text-center pt-3">Welcome back!</div>
+        </ng-template>
+        <ng-template #subtitle>
+            <div class="text-sm text-center">Enter your credentials to access the CyberHeroes admin panel</div>
+        </ng-template>
+        <ng-template #content>
+            <div>
+                <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+                    <p-floatlabel class="mt-5">
+                        <input pInputText type="email" formControlName="email" class="w-full" />
+                        <label>Email</label>
+                    </p-floatlabel>
+                    <p-floatlabel class="mt-5">
+                        <input pInputText type="password" formControlName="password" class="w-full" />
+                        <label>Password</label>
+                    </p-floatlabel>
+                    <div class="flex justify-content-center mt-4">
+                        <p-button label="Sign In" [rounded]="true"></p-button>
+                    </div>
+                    
+                </form>
+            </div>
+        </ng-template>
+    </p-card>
+</div>
