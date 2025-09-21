@@ -30,9 +30,9 @@
             routerLink="/admin-management"
           >
             <i class="pi pi-user" style="font-size: x-large"></i>
-            <span class="flex flex-column justify-content-start text-left">
-              <span class="font-bold">Amy Elsner</span>
-              <span class="text-sm">Admin</span>
+            <span class="flex flex-column justify-content-start text-left" *ngIf="userService.currentUser$ | async as user">
+              <span class="font-bold">{{ user.username || ""}}</span>
+              <span class="text-sm">{{ user.is_superadmin? "Super Admin" : "Admin"}}</span>
             </span>
           </button>
         </span>

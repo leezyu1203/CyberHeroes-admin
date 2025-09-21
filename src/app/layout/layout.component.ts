@@ -4,15 +4,19 @@ import { MenuItem } from 'primeng/api';
 import { Menu } from 'primeng/menu';
 import { RouterLink, RouterLinkActive } from "@angular/router";
 import { ButtonModule } from "primeng/button";
+import { UserService } from '../services/user.service';
+import { AsyncPipe, NgIf } from "@angular/common";
 
 @Component({
   selector: 'app-layout',
-  imports: [RouterOutlet, Menu, RouterLink, RouterLinkActive, ButtonModule],
+  imports: [RouterOutlet, Menu, RouterLink, RouterLinkActive, ButtonModule, AsyncPipe, NgIf],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.scss'
 })
 export class LayoutComponent implements OnInit {
   items: MenuItem[] | undefined;
+
+  constructor(public userService: UserService) {}
 
   ngOnInit() {
     this.items = [
@@ -24,5 +28,9 @@ export class LayoutComponent implements OnInit {
       { label: 'Quiz', icon: 'pi pi-question', routerLink: '/quiz' },
       { separator: true },
     ]
+
+    // this.userService.currentUser$.subscribe(user => {
+    //   console.log(user)
+    // })
   }
 }
