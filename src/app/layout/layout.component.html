@@ -1,2 +1,45 @@
-<p>layout works!</p>
-<router-outlet></router-outlet>
+<div class="flex">
+  <aside class="lg:w-20rem bg-green-50 h-screen p-4">
+    <p-menu [model]="items">
+      <ng-template #start>
+        <span class="inline-flex align-items-center gap-2 px-3 py-2">
+          <i
+            class="pi pi-shield text-yellow-500"
+            style="font-size: x-large"
+          ></i>
+          <h2 class="text-xl font-semibold text-teal-800">CyberHeroes Admin</h2>
+        </span>
+      </ng-template>
+      <ng-template #item let-item>
+        <a
+          pRipple
+          class="flex items-center p-menu-item-link"
+          [routerLink]="item.routerLink"
+          routerLinkActive="active"
+        >
+          <span [class]="item.icon"></span>
+          <span class="ml-2">{{ item.label }}</span>
+        </a>
+      </ng-template>
+      <ng-template #end>
+        <span class="flex align-items-center gap-2 p-1 w-full">
+          <button
+            pButton
+            severity="secondary"
+            class="flex flex-row justify-content-start gap-3 w-full"
+            routerLink="/admin-management"
+          >
+            <i class="pi pi-user" style="font-size: x-large"></i>
+            <span class="flex flex-column justify-content-start text-left">
+              <span class="font-bold">Amy Elsner</span>
+              <span class="text-sm">Admin</span>
+            </span>
+          </button>
+        </span>
+      </ng-template>
+    </p-menu>
+  </aside>
+  <main>
+    <router-outlet></router-outlet>
+  </main>
+</div>
