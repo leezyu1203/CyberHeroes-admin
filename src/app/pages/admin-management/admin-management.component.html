@@ -1,1 +1,30 @@
-<p>admin-management works!</p>
+<div *ngIf="userService.currentUser$ | async as user" class="w-full flex flex-column gap-2">
+  <h1 class="page-h1">Your Profile</h1>
+  <p-card class="w-full">
+    <div class="flex flex-row justify-content-between p-2">
+      <div class="flex flex-column">
+        <div class="text-xl font-bold text-green-800">
+          {{ user.username || "" }}
+        </div>
+        <div class="text-xs font-light text-color-secondary">
+          <i class="pi pi-envelope pr-1" style="font-size: x-small"></i>
+          {{ user.email || "" }}
+        </div>
+      </div>
+      <div>
+        <button pButton icon="pi pi-sign-out" severity="danger">
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </p-card>
+  <div>
+    <div class="flex flex-row justify-content-between align-items-center">
+      <h2 class="page-h2">Admin Management</h2>
+      <button pButton icon="pi pi-plus" size="small">Create Admin</button>
+    </div>
+    <div class="surface-100 border-round p-3">
+      basdjhk
+    </div>
+  </div>
+</div>
