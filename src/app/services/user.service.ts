@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { Auth, onAuthStateChanged, User } from '@angular/fire/auth';
+import { Auth, onAuthStateChanged, signOut, User } from '@angular/fire/auth';
 import { Firestore, doc, docData} from '@angular/fire/firestore';
 import { BehaviorSubject } from 'rxjs';
 
@@ -27,5 +27,9 @@ export class UserService {
         this.userSubject.next(null); 
       }
     });
+  }
+
+  async logout(): Promise<void> {
+    await signOut(this.auth);
   }
 }
