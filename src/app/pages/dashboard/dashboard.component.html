@@ -1,1 +1,57 @@
-<p>dashboard works!</p>
+<div>
+  <h1 class="page-h1">Dashboard</h1>
+  <div class="flex flex-row gap-3">
+    <app-dashboard-card
+      title="Filter Force Messages"
+      icon="pi pi-filter"
+      [value]="0"
+      [hasMinRequired]="true"
+      [minRequired]="10"
+      routerLink="/filter-force"
+      class="flex-1"
+    >
+    </app-dashboard-card>
+    <app-dashboard-card
+      title="Password Rush Rules"
+      icon="pi pi-lock"
+      [value]="0"
+      [hasMinRequired]="true"
+      [minRequired]="9"
+      routerLink="/password-rush"
+      class="flex-1"
+    >
+    </app-dashboard-card>
+    <app-dashboard-card
+      title="Phish or Fake Emails"
+      icon="pi pi-envelope"
+      [value]="0"
+      [hasMinRequired]="true"
+      [minRequired]="10"
+      routerLink="/phish-or-fake"
+      class="flex-1"
+    >
+    </app-dashboard-card>
+    <app-dashboard-card
+      title="Quiz"
+      icon="pi pi-question"
+      [value]="0"
+      [hasMinRequired]="false"
+      routerLink="quiz"
+      class="flex-1"
+    >
+    </app-dashboard-card>
+  </div>
+  <div class="surface-100 border-round flex flex-column gap-2 mt-4 p-4">
+    <div class="flex flex-column gap-1">
+        <div class="text-green-800 text-2xl font-semibold">Quick Actions</div>
+        <div class="text-sm font-light">
+            Manage the mini-games content from sidebar navigation
+        </div>
+    </div>
+    <ul class="text-sm">
+        <li>Navigate to each section using the sidebar menu or the card above</li>
+        <li>Ensure minimum content requirements are met for each game</li>
+        <li>Superadmins can manage other administrators</li>
+    </ul>
+  </div>
+</div>

@@ -1,0 +1,24 @@
+<button
+  pButton
+  [outlined]="true"
+  [raised]="true"
+  severity="secondary"
+  routerLink="{{ routerLink }}"
+  class="w-full h-full"
+>
+  <div class="flex flex-column w-full h-full justify-content-start align-contents-start gap-3 p-2">
+    <div class="flex flex-row justify-content-between gap-2">
+      <span class="font-semibold">{{ title }}</span>
+      <i [ngClass]="icon"></i>
+    </div>
+    <div class="font-bold text-green-800 text-4xl text-left">{{ value }}</div>
+    @if (hasMinRequired) {
+        <div
+      class="flex flex-row text-yellow-500 text-sm justify-content-start gap-2"
+    >
+      <i class="pi pi-exclamation-triangle"></i>
+      <span>Minimum required: {{ minRequired }}</span>
+    </div>
+    }
+  </div>
+</button>
