@@ -1,4 +1,7 @@
-<div *ngIf="userService.currentUser$ | async as user" class="w-full flex flex-column gap-2">
+<div
+  *ngIf="userService.currentUser$ | async as user"
+  class="w-full flex flex-column gap-2"
+>
   <h1 class="page-h1">Your Profile</h1>
   <p-card class="w-full">
     <div class="flex flex-row justify-content-between p-2">
@@ -12,7 +15,12 @@
         </div>
       </div>
       <div>
-        <button pButton icon="pi pi-sign-out" severity="danger" (click)="onLogout()">
+        <button
+          pButton
+          icon="pi pi-sign-out"
+          severity="danger"
+          (click)="onLogout()"
+        >
           Sign Out
         </button>
       </div>
@@ -21,10 +29,51 @@
   <div>
     <div class="flex flex-row justify-content-between align-items-center">
       <h2 class="page-h2">Admin Management</h2>
-      <button pButton icon="pi pi-plus" size="small">Create Admin</button>
+      <button
+        pButton
+        icon="pi pi-plus"
+        size="small"
+        (click)="showCreateAdminDialog()"
+      >
+        Create Admin
+      </button>
     </div>
-    <div class="surface-100 border-round p-3">
-      basdjhk
-    </div>
+    <div class="surface-100 border-round p-3">basdjhk</div>
   </div>
 </div>
+
+<p-dialog header="Create Admin" [modal]="true" [(visible)]="visible">
+  <form [formGroup]="createAdminForm" (ngSubmit)="onCreateAdmin()">
+    <div class="flex flex-column align-items-start gap-1 mb-4">
+      <label for="username" class="font-semibold">Username</label>
+      <input pInputText id="username" formControlName="username" class="w-full" />
+      @if (isFieldInvalid('username')) {
+        <span class="text-red-500 text-xs" *ngIf="createAdminForm.get('username')?.errors?.['required']">Username is required</span>
+      } 
+    </div>
+    <div class="flex flex-column align-items-start gap-1 mb-4">
+      <label for="email" class="font-semibold">Email</label>
+      <input pInputText id="email" formControlName="email" class="w-full" />
+      @if (isFieldInvalid('email')) {
+        <span class="text-red-500 text-xs" *ngIf="createAdminForm.get('email')?.errors?.['required']">Email is required</span>
+        <span class="text-red-500 text-xs" *ngIf="createAdminForm.get('email')?.errors?.['email']">Invalid email</span>
+      } 
+    </div>
+    <div class="flex flex-column align-items-start gap-1 mb-4">
+      <label for="password" class="font-semibold">Password</label>
+      <span class="p-text-secondary text-xs font-light">This password is a temporary password. Admin is required to renew password when logged in.</span>
+      <input pInputText id="password" formControlName="password" class="w-full" />
+      @if (isFieldInvalid('password')) {
+        <span class="text-red-500 text-xs" *ngIf="createAdminForm.get('password')?.errors?.['required']">Password is required</span>
+      } 
+    </div>
+    <div class="flex flex-row justify-content-between gap-2 mb-4">
+      <label for="is_superadmin" class="font-semibold">Super admin</label>
+      <p-toggleswitch id="is_superadmin" formControlName="isSuperadmin"></p-toggleswitch>
+    </div>
+    <div class="flex justify-content-end gap-2">
+        <p-button label="Cancel" severity="secondary" (click)="onCloseCreateAdminDialog()" />
+        <p-button label="Create" type="submit" />
+    </div>
+  </form>
+</p-dialog>
