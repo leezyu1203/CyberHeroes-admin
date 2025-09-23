@@ -15,8 +15,10 @@ export class FilterForceService {
   private firestore = inject(Firestore);
   private messagesRef: CollectionReference<DocumentData>;
 
+  messagesCollection = 'MG001_messages'
+
   constructor() { 
-    this.messagesRef = collection(this.firestore, 'MG001_messages');
+    this.messagesRef = collection(this.firestore, this.messagesCollection);
   }
 
   getMessages(): Observable<Message[]> {
@@ -31,7 +33,7 @@ export class FilterForceService {
   }
 
   async updateMessage(id: string, payload: Partial<Message>) {
-    const messageRef = doc(this.firestore, 'MG001_messages', id);
+    const messageRef = doc(this.firestore, this.messagesCollection, id);
     return await updateDoc(messageRef, {
       ...payload,
       updatedAt: serverTimestamp()

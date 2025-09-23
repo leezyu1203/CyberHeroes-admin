@@ -49,24 +49,24 @@
   </ng-template>
 </div>
 
-<p-dialog header="Create New Message" [modal]="true" [(visible)]="visible" [style]="{ width: '50%' }" (onHide)="resetCreateMessageForm()">
+<p-dialog [header]="!isEditMsg ? 'Create New Message':'Update Message'" [modal]="true" [(visible)]="visible" [style]="{ width: '50%' }" (onHide)="resetCreateMessageForm()">
   <form [formGroup]="createMessageForm" (ngSubmit)="onCreateMessage()">
     <div class="flex flex-column align-items-start gap-1 mb-4">
       <label for="message" class="font-semibold">Message</label>
-      <input pInputText id="message" formControlName="message" class="w-full" />
+      <input pInputText id="message" formControlName="message" class="w-full" [disabled]="isFormLoading" />
       @if (isFieldInvalid('message')) {
         <span class="text-red-500 text-xs" *ngIf="createMessageForm.get('message')?.errors?.['required']">Message is required</span>
       } 
     </div>
     <div class="flex flex-row justify-content-between gap-2 mb-4">
       <label for="is_danger" class="font-semibold">This is a dangerous message</label>
-      <p-toggleswitch id="is_danger" formControlName="isDanger"></p-toggleswitch>
+      <p-toggleswitch id="is_danger" formControlName="isDanger" [disabled]="isFormLoading"></p-toggleswitch>
     </div>
     <div class="flex justify-content-end gap-2">
-        <p-button label="Cancel" severity="secondary" (click)="toggleCreateMessageDialogVisibility()" />
-        <p-button label="Create" type="submit" *ngIf="!isEditMsg, else update" />
+        <p-button label="Cancel" severity="secondary" (click)="toggleCreateMessageDialogVisibility()" [disabled]="isFormLoading" />
+        <p-button label="Create" type="submit" *ngIf="!isEditMsg, else update" [loading]="isFormLoading" />
         <ng-template #update>
-          <p-button label="Update" (onClick)="onUpdateMessage()" [disabled]="createMessageForm.pristine || createMessageForm.invalid"/>
+          <p-button label="Update" (onClick)="onUpdateMessage()" [disabled]="createMessageForm.pristine || createMessageForm.invalid" [loading]="isFormLoading" />
         </ng-template>
       </div>
   </form>

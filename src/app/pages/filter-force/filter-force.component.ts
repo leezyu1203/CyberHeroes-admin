@@ -23,6 +23,7 @@ export class FilterForceComponent implements OnInit {
   visible: boolean = false;
   isLoading: boolean = true;
   isEditMsg: boolean = false;
+  isFormLoading: boolean = false;
   createMessageForm!: FormGroup;
   messages: Message[] = [] ;
 
@@ -52,6 +53,7 @@ export class FilterForceComponent implements OnInit {
       this.createMessageForm.markAllAsTouched();
       return;
     }
+    this.isFormLoading = true;
     const payload: Message = {
       message: this.createMessageForm.get('message')?.value,
       is_danger: this.createMessageForm.get('isDanger')?.value,
@@ -66,6 +68,7 @@ export class FilterForceComponent implements OnInit {
       } else {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
       }
+      this.isFormLoading = false;
     }
   }
 
@@ -74,6 +77,7 @@ export class FilterForceComponent implements OnInit {
       this.createMessageForm.markAllAsTouched();
       return;
     }
+    this.isFormLoading = true;
     const payload: Message = {
       message: this.createMessageForm.get('message')?.value,
       is_danger: this.createMessageForm.get('isDanger')?.value,
@@ -89,6 +93,7 @@ export class FilterForceComponent implements OnInit {
       } else {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
       }
+      this.isFormLoading = false;
     }
   }
 
@@ -108,10 +113,8 @@ export class FilterForceComponent implements OnInit {
     if (this.visible) {
       this.resetCreateMessageForm();
     }
-    if (this.isEditMsg) {
-      this.isEditMsg = false;
-    }
     this.visible = !this.visible;
+    this.isFormLoading = false;
   }
 
   resetCreateMessageForm() {
@@ -120,9 +123,7 @@ export class FilterForceComponent implements OnInit {
       isDanger: false,
       id: '',
     });
-    if (this.isEditMsg) {
-      this.isEditMsg = false;
-    }
+    this.isEditMsg = false;
   }
 
   isFieldInvalid(controlName: string): boolean {

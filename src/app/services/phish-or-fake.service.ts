@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { addDoc, collection, collectionData, CollectionReference, DocumentData, Firestore, serverTimestamp } from '@angular/fire/firestore';
+import { addDoc, collection, collectionData, CollectionReference, DocumentData, Firestore, serverTimestamp, doc, updateDoc } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
 export interface Email {
@@ -17,8 +17,10 @@ export class PhishOrFakeService {
   private firestore = inject(Firestore);
   private emailsRef: CollectionReference<DocumentData>;
 
+  emailsCollection: string = 'MG003_emails';
+
   constructor() { 
-    this.emailsRef = collection(this.firestore, 'MG003_emails')
+    this.emailsRef = collection(this.firestore, this.emailsCollection);
   }
 
   getEmails(): Observable<Email[]> {
@@ -30,5 +32,13 @@ export class PhishOrFakeService {
       ...payload,
       createdAt: serverTimestamp()
     });
+  }
+
+  async updateEmail(id: string, payload: Partial<Email>) {
+    const messageRef = doc(this.firestore, this.emailsCollection, id);
+    return await updateDoc(messageRef, {
+      ...payload,
+      updatedAt: serverTimestamp()
+    })
   }
 }

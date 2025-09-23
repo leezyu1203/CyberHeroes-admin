@@ -23,6 +23,8 @@ import { ToastModule } from 'primeng/toast';
 export class PhishOrFakeComponent implements OnInit {
   visible: boolean = false;
   isLoading: boolean = true;
+  isEditEmail: boolean = false;
+  isFormLoading: boolean = false;
   createEmailForm!: FormGroup;
   emails: Email[] = [];
 
@@ -34,6 +36,7 @@ export class PhishOrFakeComponent implements OnInit {
       senderEmail: ['', [Validators.required]],
       content: ['', [Validators.required]],
       isPhishing: [false],
+      id: [''],
     });
     this.pofService.getEmails().subscribe({
       next: res => {
@@ -52,6 +55,7 @@ export class PhishOrFakeComponent implements OnInit {
       this.createEmailForm.markAllAsTouched();
       return
     }
+    this.isFormLoading = true;
     const payload: Email = {
       subject: this.createEmailForm.get('subject')?.value,
       sender: this.createEmailForm.get('senderEmail')?.value,
@@ -68,7 +72,49 @@ export class PhishOrFakeComponent implements OnInit {
       } else {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
       }
+      this.isFormLoading = false;
     }
+  }
+
+  async onUpdateEmail() {
+    if (!this.createEmailForm.valid) {
+      this.createEmailForm.markAllAsTouched();
+      return;
+    }
+    this.isFormLoading = true;
+    const payload: Email = {
+      subject: this.createEmailForm.get('subject')?.value,
+      sender: this.createEmailForm.get('senderEmail')?.value,
+      content: this.createEmailForm.get('content')?.value,
+      is_phishing: this.createEmailForm.get('isPhishing')?.value,
+    }
+    const id: string = this.createEmailForm.get('id')?.value;
+    try {
+      this.pofService.updateEmail(id, payload);
+      this.toggleCreateEmailDialogVisibility();
+      this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email is updated!', life: 3000 });
+    } catch (err) {
+      if (err instanceof Error) {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
+      } else {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
+        this.isFormLoading = false;
+      }
+    }
+  }
+
+  onEditState(index: number) {
+    const editingEmail = this.emails[index];
+    this.createEmailForm.setValue({
+      subject: editingEmail.subject,
+      senderEmail: editingEmail.sender,
+      content: editingEmail.content,
+      isPhishing: editingEmail.is_phishing,
+      id: editingEmail.id,
+    });
+    this.toggleCreateEmailDialogVisibility();
+    this.isEditEmail = true;
+    this.createEmailForm.markAsPristine();
   }
 
   toggleCreateEmailDialogVisibility() {
@@ -76,6 +122,7 @@ export class PhishOrFakeComponent implements OnInit {
       this.resetCreateEmailForm()
     }
     this.visible = !this.visible;
+    this.isFormLoading = false;
   }
 
   resetCreateEmailForm() {
@@ -84,7 +131,9 @@ export class PhishOrFakeComponent implements OnInit {
       senderEmail: '',
       content: '',
       isPhishing: false,
+      id: '',
     });
+    this.isEditEmail = false;
   }
 
   isFieldInvalid(controlName: string): boolean {
