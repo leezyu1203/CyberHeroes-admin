@@ -48,7 +48,27 @@ export class PhishOrFakeComponent implements OnInit {
   }
 
   async onCreateEmail() {
-    this.toggleCreateEmailDialogVisibility();
+    if (!this.createEmailForm.valid) {
+      this.createEmailForm.markAllAsTouched();
+      return
+    }
+    const payload: Email = {
+      subject: this.createEmailForm.get('subject')?.value,
+      sender: this.createEmailForm.get('senderEmail')?.value,
+      content: this.createEmailForm.get('content')?.value,
+      is_phishing: this.createEmailForm.get('isPhishing')?.value,
+    }
+    try {
+      await this.pofService.createEmail(payload);
+      this.toggleCreateEmailDialogVisibility();
+      this.messageService.add({ severity: 'success', summary: 'Success', detail: 'New email created!', life: 3000 });
+    } catch (err) {
+      if (err instanceof Error) {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
+      } else {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
+      }
+    }
   }
 
   toggleCreateEmailDialogVisibility() {

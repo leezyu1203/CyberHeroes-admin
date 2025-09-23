@@ -7,11 +7,12 @@ import { Dialog } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ToastModule } from 'primeng/toast';
+import { TableModule } from 'primeng/table';
 import { PasswordRushService, Rule } from '../../services/password-rush.service';
 
 @Component({
   selector: 'app-password-rush',
-  imports: [ButtonModule, InputTextModule, ReactiveFormsModule, CommonModule, Dialog, SkeletonModule, ToastModule],
+  imports: [ButtonModule, InputTextModule, ReactiveFormsModule, CommonModule, Dialog, SkeletonModule, ToastModule, TableModule],
   templateUrl: './password-rush.component.html',
   styleUrl: './password-rush.component.scss',
   providers: [MessageService]
