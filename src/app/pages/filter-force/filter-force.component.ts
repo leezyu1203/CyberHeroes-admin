@@ -46,7 +46,25 @@ export class FilterForceComponent implements OnInit {
   }
 
   async onCreateMessage() {
-    this.toggleCreateMessageDialogVisibility();
+    if (!this.createMessageForm.valid) {
+      this.createMessageForm.markAllAsTouched();
+      return;
+    }
+    const payload: Message = {
+      message: this.createMessageForm.get('message')?.value,
+      is_danger: this.createMessageForm.get('message')?.value,
+    }
+    try {
+      this.ffService.createMessage(payload);
+      this.toggleCreateMessageDialogVisibility();
+      this.messageService.add({ severity: 'success', summary: 'Success', detail: 'New message created!', life: 3000 });
+    } catch (err) {
+      if (err instanceof Error) {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
+      } else {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
+      }
+    }
   }
 
   toggleCreateMessageDialogVisibility() {

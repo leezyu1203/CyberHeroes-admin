@@ -25,9 +25,9 @@ export class PhishOrFakeService {
     return collectionData(this.emailsRef, { idField: 'id' }) as Observable<Email[]>;
   }
 
-  async createEmail(data: Email) {
+  async createEmail(payload: Email) {
     return await addDoc(this.emailsRef, {
-      ...data,
+      ...payload,
       createdAt: serverTimestamp()
     });
   }

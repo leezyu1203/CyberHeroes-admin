@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { collection, collectionData, Firestore } from '@angular/fire/firestore';
+import { addDoc, collection, collectionData, CollectionReference, DocumentData, Firestore, serverTimestamp } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
 export interface Message {
@@ -13,11 +13,20 @@ export interface Message {
 })
 export class FilterForceService {
   private firestore = inject(Firestore);
+  private messagesRef: CollectionReference<DocumentData>;
 
-  constructor() { }
+  constructor() { 
+    this.messagesRef = collection(this.firestore, 'MG001_messages');
+  }
 
   getMessages(): Observable<Message[]> {
-    const messagesRef = collection(this.firestore, 'MG001_messages');
-    return collectionData(messagesRef, { idField: 'id' }) as Observable<Message[]>;
+    return collectionData(this.messagesRef, { idField: 'id' }) as Observable<Message[]>;
+  }
+
+  async createMessage(payload: Message) {
+    return await addDoc(this.messagesRef, {
+      ...payload,
+      createdAt: serverTimestamp()
+    });
   }
 }
