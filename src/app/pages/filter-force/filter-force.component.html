@@ -35,7 +35,7 @@
           </td>
           <td>
             <span class="flex flex-row gap-2">
-              <p-button icon="pi pi-file-edit" [rounded]="true" [outlined]="true" size="small"></p-button>
+              <p-button icon="pi pi-file-edit" [rounded]="true" [outlined]="true" size="small" (onClick)="onEditState(rowIndex)"></p-button>
               <p-button icon="pi pi-trash" [rounded]="true" [outlined]="true" size="small" *ngIf="messages.length > 10"></p-button>
             </span>
           </td>
@@ -64,8 +64,11 @@
     </div>
     <div class="flex justify-content-end gap-2">
         <p-button label="Cancel" severity="secondary" (click)="toggleCreateMessageDialogVisibility()" />
-        <p-button label="Create" type="submit" />
-    </div>
+        <p-button label="Create" type="submit" *ngIf="!isEditMsg, else update" />
+        <ng-template #update>
+          <p-button label="Update" (onClick)="onUpdateMessage()" [disabled]="createMessageForm.pristine || createMessageForm.invalid"/>
+        </ng-template>
+      </div>
   </form>
 </p-dialog>
 
