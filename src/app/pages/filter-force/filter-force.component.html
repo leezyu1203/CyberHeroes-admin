@@ -11,9 +11,37 @@
     </div>
     <button pButton icon="pi pi-plus" (click)="toggleCreateMessageDialogVisibility()" >Create Message</button>
   </div>
-  <div class="surface-100 border-round flex flex-column gap-2 p-4">
-
+  <div class="surface-100 border-round flex flex-column gap-2 p-4" *ngIf="!isLoading, else loading">
+    @if (messages.length <= 0) { No messages yet. } @else {
+    <p-table [value]="messages" [paginator]="true" [rows]="10">
+      <ng-template #header>
+        <tr>
+          <th>No.</th>
+          <th>Message</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-message let-rowIndex="rowIndex">
+        <tr>
+          <td>{{ rowIndex + 1 }}</td>
+          <td>{{ message.message }}</td>
+          <td>
+            <p-badge
+              [value]="message.is_danger ? 'Danger' : 'Normal'"
+              [severity]="message.is_danger ? 'danger' : 'success'"
+              badgeSize="small"
+            ></p-badge>
+          </td>
+          <td>no action</td>
+        </tr>
+      </ng-template>
+    </p-table>
+    }
   </div>
+  <ng-template #loading>
+    <p-skeleton width="100%" height="4rem" />
+  </ng-template>
 </div>
 
 <p-dialog header="Create New Message" [modal]="true" [(visible)]="visible" [style]="{ width: '50%' }" (onHide)="resetCreateMessageForm()">
@@ -35,3 +63,5 @@
     </div>
   </form>
 </p-dialog>
+
+<p-toast></p-toast>
