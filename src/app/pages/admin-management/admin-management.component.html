@@ -33,7 +33,7 @@
         pButton
         icon="pi pi-plus"
         size="small"
-        (click)="showCreateAdminDialog()"
+        (click)="toggleCreateAdminDialogVisibility()"
       >
         Create Admin
       </button>
@@ -42,7 +42,7 @@
   </div>
 </div>
 
-<p-dialog header="Create Admin" [modal]="true" [(visible)]="visible">
+<p-dialog header="Create Admin" [modal]="true" [(visible)]="visible" (onHide)="resetCreateAdminForm()">
   <form [formGroup]="createAdminForm" (ngSubmit)="onCreateAdmin()">
     <div class="flex flex-column align-items-start gap-1 mb-4">
       <label for="username" class="font-semibold">Username</label>
@@ -72,7 +72,7 @@
       <p-toggleswitch id="is_superadmin" formControlName="isSuperadmin"></p-toggleswitch>
     </div>
     <div class="flex justify-content-end gap-2">
-        <p-button label="Cancel" severity="secondary" (click)="onCloseCreateAdminDialog()" />
+        <p-button label="Cancel" severity="secondary" (click)="toggleCreateAdminDialogVisibility()" />
         <p-button label="Create" type="submit" />
     </div>
   </form>

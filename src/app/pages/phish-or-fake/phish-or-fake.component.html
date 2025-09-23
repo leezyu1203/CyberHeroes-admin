@@ -9,10 +9,43 @@
         <span>Minimum emails for Phish or Fake are 10</span>
       </div>
     </div>
-    <button pButton icon="pi pi-plus">Create Email</button>
+    <button pButton icon="pi pi-plus" (click)="toggleCreateEmailDialogVisibility()">Create Email</button>
   </div>
   <div class="surface-100 border-round flex flex-column gap-2 p-4">
 
   </div>
 </div>
 
+<p-dialog header="Create New Email" [modal]="true" [(visible)]="visible" [style]="{ width: '50%' }" (onHide)="resetCreateEmailForm()">
+  <form [formGroup]="createEmailForm" (ngSubmit)="onCreateEmail()">
+    <div class="flex flex-column align-items-start gap-1 mb-4">
+      <label for="subject" class="font-semibold">Subject</label>
+      <input pInputText id="subject" formControlName="subject" class="w-full" />
+      @if (isFieldInvalid('subject')) {
+        <span class="text-red-500 text-xs" *ngIf="createEmailForm.get('subject')?.errors?.['required']">Subject is required</span>
+      } 
+    </div>
+    <div class="flex flex-column align-items-start gap-1 mb-4">
+      <label for="senderEmail" class="font-semibold">Sender Email</label>
+      <input pInputText id="senderEmail" formControlName="senderEmail" class="w-full" />
+      @if (isFieldInvalid('senderEmail')) {
+        <span class="text-red-500 text-xs" *ngIf="createEmailForm.get('senderEmail')?.errors?.['required']">Sender email is required</span>
+      } 
+    </div>
+    <div class="flex flex-column align-items-start gap-1 mb-4">
+      <label for="content" class="font-semibold">Content</label>
+      <textarea pTextarea id="content" formControlName="content" rows="6" cols="77"></textarea>
+      @if (isFieldInvalid('content')) {
+        <span class="text-red-500 text-xs" *ngIf="createEmailForm.get('content')?.errors?.['required']">Content is required</span>
+      } 
+    </div>
+    <div class="flex flex-row justify-content-between gap-2 mb-4">
+      <label for="is_phishing" class="font-semibold">This is a phishing email</label>
+      <p-toggleswitch id="is_phishing" formControlName="isPhishing"></p-toggleswitch>
+    </div>
+    <div class="flex justify-content-end gap-2">
+        <p-button label="Cancel" severity="secondary" (click)="toggleCreateEmailDialogVisibility()" />
+        <p-button label="Create" type="submit" />
+    </div>
+  </form>
+</p-dialog>

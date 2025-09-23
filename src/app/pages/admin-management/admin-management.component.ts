@@ -36,15 +36,17 @@ export class AdminManagementComponent implements OnInit {
   }
   
   async onCreateAdmin() {
-    this.onCloseCreateAdminDialog();
+    this.toggleCreateAdminDialogVisibility();
   }
 
-  showCreateAdminDialog() {
-    this.visible = true;
+  toggleCreateAdminDialogVisibility() {
+    if (this.visible) {
+      this.resetCreateAdminForm();
+    }
+    this.visible = !this.visible;
   }
 
-  onCloseCreateAdminDialog() {
-    this.visible = false;
+  resetCreateAdminForm() {
     this.createAdminForm.reset({
       username: '',
       email: '',
