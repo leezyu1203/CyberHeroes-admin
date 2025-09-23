@@ -11,9 +11,37 @@
     </div>
     <button pButton icon="pi pi-plus" (click)="toggleCreateEmailDialogVisibility()">Create Email</button>
   </div>
-  <div class="surface-100 border-round flex flex-column gap-2 p-4">
-
+  <div class="surface-100 border-round flex flex-column gap-2 p-4" *ngIf="!isLoading, else loading">
+    @if (emails.length <= 0) { No emails yet. } @else {
+    <p-table [value]="emails" [paginator]="true" [rows]="10">
+      <ng-template #header>
+        <tr>
+          <th>No.</th>
+          <th>Subject</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-email let-rowIndex="rowIndex">
+        <tr>
+          <td>{{ rowIndex + 1 }}</td>
+          <td>{{ email.subject }}</td>
+          <td>
+            <p-badge
+              [value]="email.is_phishing ? 'Phishing' : 'Normal'"
+              [severity]="email.is_phishing ? 'danger' : 'success'"
+              badgeSize="small"
+            ></p-badge>
+          </td>
+          <td>no action</td>
+        </tr>
+      </ng-template>
+    </p-table>
+    }
   </div>
+  <ng-template #loading>
+    <p-skeleton width="100%" height="4rem" />
+  </ng-template>
 </div>
 
 <p-dialog header="Create New Email" [modal]="true" [(visible)]="visible" [style]="{ width: '50%' }" (onHide)="resetCreateEmailForm()">
@@ -49,3 +77,5 @@
     </div>
   </form>
 </p-dialog>
+
+<p-toast></p-toast>
