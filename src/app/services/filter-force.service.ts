@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { addDoc, collection, collectionData, CollectionReference, DocumentData, Firestore, serverTimestamp, updateDoc, doc } from '@angular/fire/firestore';
+import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Observable } from 'rxjs';
 
 export interface Message {
@@ -13,6 +14,7 @@ export interface Message {
 })
 export class FilterForceService {
   private firestore = inject(Firestore);
+  private functions = inject(Functions);
   private messagesRef: CollectionReference<DocumentData>;
 
   messagesCollection = 'MG001_messages'
@@ -38,5 +40,11 @@ export class FilterForceService {
       ...payload,
       updatedAt: serverTimestamp()
     });
+  }
+
+  async deleteMessage(id: string) {
+    console.log(id);
+    const deleteFn = httpsCallable(this.functions, 'deleteFilterForceMessage');
+    return deleteFn({docId: id});
   }
 }

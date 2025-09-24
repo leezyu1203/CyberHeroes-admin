@@ -97,6 +97,19 @@ export class FilterForceComponent implements OnInit {
     }
   }
 
+  async onDeleteMessage(id: string) {
+    try {
+      await this.ffService.deleteMessage(id);
+      this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Message is deleted!', life: 3000 });
+    } catch (err) {
+      if (err instanceof Error) {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
+      } else {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
+      }
+    }
+  }
+
   onEditState(index: number) {
     const editingMessage = this.messages[index];
     this.createMessageForm.setValue({

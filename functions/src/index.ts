@@ -8,8 +8,10 @@
  */
 
 import {setGlobalOptions} from "firebase-functions";
-import {onRequest} from "firebase-functions/https";
+import {onCall} from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
+import {getFirestore} from "firebase-admin/firestore";
+import {initializeApp} from "firebase-admin/app";
 
 // Start writing functions
 // https://firebase.google.com/docs/functions/typescript
@@ -24,7 +26,59 @@ import * as logger from "firebase-functions/logger";
 // functions should each use functions.runWith({ maxInstances: 10 }) instead.
 // In the v1 API, each function can only serve one request per container, so
 // this will be the maximum concurrent request count.
-setGlobalOptions({ maxInstances: 10 });
+setGlobalOptions({maxInstances: 10});
+
+initializeApp();
+
+const db = getFirestore();
+
+export const deleteFilterForceMessage = onCall(async (request) => {
+  const messagesCollection = "MG001_messages";
+  const uid = request.auth?.uid;
+  if (!uid) {
+    throw new Error("Unauthorised: User must be logged in.");
+  }
+
+  const {docId} = request.data;
+  if (!docId) {
+    throw new Error("Missing docId");
+  }
+
+  const snapshot = await db.collection(messagesCollection).get();
+  const totalDocs = snapshot.size;
+  if (totalDocs <= 10) {
+    throw new Error("Cannot delete. At least 10 messages must remain.");
+  }
+
+  await db.collection(messagesCollection).doc(docId).delete();
+  logger.info(`Message ${docId} deleted by ${uid}`);
+
+  return {success: true, message: "Document deleted successfully"};
+});
+
+export const deletePhishOrFakeEmail = onCall(async (request) => {
+  const emailsCollection = "MG003_emails";
+  const uid = request.auth?.uid;
+  if (!uid) {
+    throw new Error("Unauthorised: User must be logged in.");
+  }
+
+  const {docId} = request.data;
+  if (!docId) {
+    throw new Error("Missing docId");
+  }
+
+  const snapshot = await db.collection(emailsCollection).get();
+  const totalDocs = snapshot.size;
+  if (totalDocs <= 10) {
+    throw new Error("Cannot delete. At least 10 emails must remain.");
+  }
+
+  await db.collection(emailsCollection).doc(docId).delete();
+  logger.info(`Email ${docId} deleted by ${uid}`);
+
+  return {success: true, message: "Document deleted successfully"};
+});
 
 // export const helloWorld = onRequest((request, response) => {
 //   logger.info("Hello logs!", {structuredData: true});
