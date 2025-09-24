@@ -5,10 +5,11 @@ import { ButtonModule } from 'primeng/button';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SkeletonModule } from 'primeng/skeleton';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'app-quiz',
-  imports: [ButtonModule, RouterLink, CommonModule, SkeletonModule],
+  imports: [ButtonModule, RouterLink, CommonModule, SkeletonModule, ToastModule],
   templateUrl: './quiz.component.html',
   styleUrl: './quiz.component.scss',
   providers: [MessageService]

@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { collection, collectionData, CollectionReference, DocumentData, Firestore } from '@angular/fire/firestore';
+import { collection, collectionData, CollectionReference, doc, docData, DocumentData, Firestore, getDoc } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
 export interface QuizLevel {
@@ -30,6 +30,7 @@ export class QuizService {
   private levelsRef: CollectionReference<DocumentData>;
 
   levelsCollection = 'quiz_levels';
+  questionsCollection = 'questions'
 
   constructor() { 
     this.levelsRef = collection(this.firestore, this.levelsCollection);
@@ -37,5 +38,15 @@ export class QuizService {
 
   getQuizLevels(): Observable<QuizLevel[]> {
     return collectionData(this.levelsRef, { idField: 'id' }) as Observable<QuizLevel[]>;
+  }
+
+  getQuizLevelById(levelId: string): Observable<QuizLevel> {
+    const docRef = doc(this.firestore, `${this.levelsCollection}/${levelId}`);
+    return docData(docRef, { idField: 'id' }) as Observable<QuizLevel>;
+  }
+
+  getQuestions(levelId: string): Observable<QuizQuestion[]> {
+    const questionsRef = collection(this.firestore, `${this.levelsCollection}/${levelId}/${this.questionsCollection}`);
+    return collectionData(questionsRef, { idField: 'id' }) as Observable<QuizQuestion[]>;
   }
 }
