@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { addDoc, collection, collectionData, CollectionReference, DocumentData, Firestore, serverTimestamp, doc, updateDoc } from '@angular/fire/firestore';
+import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Observable } from 'rxjs';
 
 export interface Email {
@@ -15,6 +16,7 @@ export interface Email {
 })
 export class PhishOrFakeService {
   private firestore = inject(Firestore);
+  private functions = inject(Functions);
   private emailsRef: CollectionReference<DocumentData>;
 
   emailsCollection: string = 'MG003_emails';
@@ -40,5 +42,10 @@ export class PhishOrFakeService {
       ...payload,
       updatedAt: serverTimestamp()
     })
+  }
+
+  async deleteEmail(id: string) {
+    const deleteFn = httpsCallable(this.functions, 'deletePhishOrFakeEmail');
+    return deleteFn({ docId: id });
   }
 }

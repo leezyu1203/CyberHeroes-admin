@@ -98,7 +98,20 @@ export class PhishOrFakeComponent implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
       } else {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
-        this.isFormLoading = false;
+      }
+      this.isFormLoading = false;
+    }
+  }
+
+  async onDeleteEmail(id: string) {
+    try {
+      await this.pofService.deleteEmail(id);
+      this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email is deleted!', life: 3000 });
+    } catch (err) {
+      if (err instanceof Error) {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
+      } else {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
       }
     }
   }
