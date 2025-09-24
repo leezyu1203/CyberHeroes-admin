@@ -35,7 +35,7 @@
           </td>
           <td>
             <span class="flex flex-row gap-2">
-              <p-button icon="pi pi-eye" [rounded]="true" [outlined]="true" size="small"></p-button>
+              <p-button icon="pi pi-eye" [rounded]="true" [outlined]="true" size="small" (onClick)="onViewEmail(email)"></p-button>
               <p-button icon="pi pi-file-edit" [rounded]="true" [outlined]="true" size="small" (onClick)="onEditState(rowIndex)"></p-button>
               <p-button icon="pi pi-trash" [rounded]="true" [outlined]="true" size="small" [disabled]="emails.length <= 10" (onClick)="onDeleteEmail(email.id)"></p-button>
             </span>
@@ -85,6 +85,32 @@
         </ng-template>
     </div>
   </form>
+</p-dialog>
+
+<p-dialog [modal]="true" [(visible)]="isViewing" [style]="{ width: '50%' }">
+  <ng-template #header>
+    <span class="flex flex-row gap-3">
+      <span class="p-dialog-title">View Email</span>
+      <p-badge
+              [value]="viewingEmail?.is_phishing ? 'Phishing' : 'Normal'"
+              [severity]="viewingEmail?.is_phishing ? 'danger' : 'success'"
+              badgeSize="small"
+            ></p-badge>
+    </span>
+  </ng-template>
+  <div class="flex flex-column gap-2">
+    <div class="flex flex-row gap-4">
+      <span class="text-color-secondary">Subject</span>
+      <span>{{ viewingEmail?.subject }}</span>
+    </div>
+    <div class="flex flex-row gap-3">
+      <span class="text-color-secondary">From</span>
+      <span>{{ viewingEmail?.sender }}</span>
+    </div>
+    <p [ngStyle]="{ 'white-space': 'pre-line' }" class="mt-3">
+      {{ viewingEmail?.content }}
+    </p>
+  </div>
 </p-dialog>
 
 <p-toast></p-toast>

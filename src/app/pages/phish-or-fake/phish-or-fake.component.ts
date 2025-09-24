@@ -25,8 +25,10 @@ export class PhishOrFakeComponent implements OnInit {
   isLoading: boolean = true;
   isEditEmail: boolean = false;
   isFormLoading: boolean = false;
+  isViewing: boolean = false;
   createEmailForm!: FormGroup;
   emails: Email[] = [];
+  viewingEmail?: Email;
 
   constructor(private fb: FormBuilder, private pofService: PhishOrFakeService, private messageService: MessageService) {}
   
@@ -114,6 +116,11 @@ export class PhishOrFakeComponent implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
       }
     }
+  }
+
+  onViewEmail(viewingEmail: Email) {
+    this.isViewing = true;
+    this.viewingEmail = viewingEmail;
   }
 
   onEditState(index: number) {
