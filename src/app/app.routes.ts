@@ -8,6 +8,7 @@ import { PasswordRushComponent } from './pages/password-rush/password-rush.compo
 import { FilterForceComponent } from './pages/filter-force/filter-force.component';
 import { AdminManagementComponent } from './pages/admin-management/admin-management.component';
 import { QuizComponent } from './pages/quiz/quiz.component';
+import { QuizQuestionsComponent } from './pages/quiz/quiz-questions/quiz-questions.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent, canActivate: [noAuthGuard] },
@@ -21,6 +22,7 @@ export const routes: Routes = [
             { path: 'password-rush', component: PasswordRushComponent },
             { path: 'filter-force', component: FilterForceComponent },
             { path: 'quiz', component: QuizComponent },
+            { path: 'quiz/:id', component: QuizQuestionsComponent }, 
             { path: 'admin-management', component: AdminManagementComponent },
         ],
     },
