@@ -1,8 +1,11 @@
 <div class="flex flex-column gap-3" *ngIf="!isLoading; else loading">
   @if (quizLevel) {
-  <h1 class="page-h1">
-    Level {{ quizLevel.level + 1 }} - {{ quizLevel.level_name }}
-  </h1>
+  <div class="flex flex-row justify-content-between align-items-center">
+    <h1 class="page-h1">
+      Level {{ quizLevel.level + 1 }} - {{ quizLevel.level_name }}
+    </h1>
+    <p-button label="Create Question" icon="pi pi-plus" (onClick)="toggleCreateQuestionDialogVisibility()"></p-button>
+  </div>
   <div class="surface-100 border-round flex flex-column gap-2 p-4">
     <div class="flex flex-row gap-2 align-items-center vertical-align-middle">
         <span>Number of questions: </span>
@@ -20,9 +23,15 @@
       <p-accordion-panel [value]="i">
         <p-accordion-header>{{ ques.question }}</p-accordion-header>
         <p-accordion-content>
-          <div class="flex flex-column gap-3">
-            <div class="font-light text-sm text-green-600">
-              Explanation: {{ ques.explanation }}
+          <div class="flex flex-column gap-2">
+            <div class="flex flex-row justify-content-between align-items-center vertical-align-middle">
+              <div class="font-light text-sm text-green-600">
+                Explanation: {{ ques.explanation }}
+              </div>
+              <div class="flex flex-row gap-2">
+                <p-button icon="pi pi-file-edit" [rounded]="true" [outlined]="true" size="small"></p-button>
+                <p-button icon="pi pi-trash" [rounded]="true" [outlined]="true" severity="danger" size="small"></p-button>
+              </div>
             </div>
             <div class="surface-100 border-round p-2 flex flex-column gap-2" *ngIf="ques.answers; else answerLoading">
               <div class="text-medium text-green-700 font-semibold">
@@ -58,5 +67,46 @@
     <p-skeleton width="100%" height="4rem" />
   </div>
 </ng-template>
+
+<p-dialog [header]="!isQuesEditing ? 'Create New Question':'Update Question'" [modal]="true" [(visible)]="visible" [style]="{ width: '50%' }" (onHide)="resetCreateQuestionForm()" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }">
+  <form [formGroup]="createQuestionForm" (ngSubmit)="onCreateQuestion()">
+    <div class="flex flex-column align-items-start gap-1 mb-4">
+      <label for="question" class="font-semibold">Question</label>
+      <input pInputText id="question" formControlName="question" class="w-full" [disabled]="isFormLoading" />
+      @if (isFieldInvalid('question')) {
+        <span class="text-red-500 text-xs" *ngIf="createQuestionForm.get('question')?.errors?.['required']">Question is required</span>
+      } 
+    </div>
+    <div class="flex flex-column align-items-start gap-1 mb-4">
+      <label for="explanation" class="font-semibold">Explanation</label>
+      <input pInputText id="explanation" formControlName="explanation" class="w-full" [disabled]="isFormLoading" />
+      @if (isFieldInvalid('explanation')) {
+        <span class="text-red-500 text-xs" *ngIf="createQuestionForm.get('explanation')?.errors?.['required']">Explanation is required</span>
+      } 
+    </div>
+    <div class="flex flex-column align-items-start gap-1 mb-4">
+      <div class="flex flex-row justify-content-between align-items-center vertical-align-middle w-full">
+        <label class="font-semibold">Answers</label>
+        <p-button label="More Answer" icon="pi pi-plus" size="small" (onClick)="answers.push(answerForm())"></p-button>
+      </div>
+      <div formArrayName="answers" class="flex flex-column gap-2 w-full">
+        <div *ngFor="let ans of answers.controls; let i = index" [formGroupName]="i" class="flex flex-row gap-4">
+          <input pInputText [id]="i" formControlName="answer" placeholder="Answer" class="w-full" [disabled]="isFormLoading" />
+          <span class="flex flex-row gap-2 align-items-center vertical-align-middle ">
+            <span class="font-light">Correct: </span>
+            <p-toggleswitch [id]="`${i}_is_true`" formControlName="is_true" [disabled]="isFormLoading"></p-toggleswitch>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="flex justify-content-end gap-2">
+        <p-button label="Cancel" severity="secondary" (click)="toggleCreateQuestionDialogVisibility()" [disabled]="isFormLoading" />
+        <p-button label="Create" type="submit" *ngIf="!isQuesEditing, else update" [loading]="isFormLoading" />
+        <ng-template #update>
+          <p-button label="Update" (onClick)="onUpdateQuestion()" [disabled]="createQuestionForm.pristine || createQuestionForm.invalid" [loading]="isFormLoading" />
+        </ng-template>
+      </div>
+  </form>
+</p-dialog>
 
 <p-toast></p-toast>

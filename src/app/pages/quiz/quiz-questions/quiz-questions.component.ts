@@ -8,27 +8,35 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { FormsModule } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AccordionModule, AccordionTabOpenEvent } from 'primeng/accordion';
 import { TableModule } from 'primeng/table';
 import { BadgeModule } from 'primeng/badge';
+import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 
 @Component({
   selector: 'app-quiz-questions',
-  imports: [ToastModule, SkeletonModule, CommonModule, ButtonModule, InputNumberModule, FormsModule, AccordionModule, TableModule, BadgeModule],
+  imports: [ToastModule, SkeletonModule, CommonModule, ButtonModule, InputNumberModule, FormsModule, AccordionModule, TableModule, BadgeModule, DialogModule, ReactiveFormsModule, InputTextModule, ToggleSwitchModule],
   templateUrl: './quiz-questions.component.html',
   styleUrl: './quiz-questions.component.scss',
   providers: [MessageService]
 })
 export class QuizQuestionsComponent implements OnInit {
+  visible: boolean = false;
   isLoading: boolean = true;
   isQuesNumEditing: boolean = false;
+  isQuesEditing: boolean = false;
   isUpdateQuesNumLoading: boolean = false;
+  isFormLoading: boolean = false;
   quizLevel?: QuizLevel;
-  questions: QuizQuestion[] = [];
+  questions: (QuizQuestion & { isEditing: boolean })[] = [];
   questionNumField: number = 0;
 
-  constructor(private quizService: QuizService, private route: ActivatedRoute, private router: Router, private messageService: MessageService) {}
+  createQuestionForm!: FormGroup;
+
+  constructor(private quizService: QuizService, private route: ActivatedRoute, private router: Router, private messageService: MessageService, private fb: FormBuilder) {}
 
   ngOnInit() {
     const levelId = this.route.snapshot.paramMap.get('id');
@@ -43,7 +51,11 @@ export class QuizQuestionsComponent implements OnInit {
         })
       ).subscribe({
         next: questions => {
-          this.questions = questions;
+          // this.questions = questions;
+          this.questions = questions.map((ques: QuizQuestion) => ({
+            ...ques,
+            isEditing: false,
+          }))
           console.log("level: ", this.quizLevel);
           console.log("question: ", this.questions);
           this.questionNumField = this.quizLevel?.question_num || 0;
@@ -61,6 +73,15 @@ export class QuizQuestionsComponent implements OnInit {
       this.onError('Missing quiz level ID');
       this.isLoading = false;
     }
+
+    this.createQuestionForm = this.fb.group({
+      question: ['', [Validators.required]],
+      explanation: ['', [Validators.required]],
+      answers: this.fb.array([
+        this.answerForm('', true),
+        this.answerForm(),
+      ])
+    });
   }
 
   onError(errMsg: string) {
@@ -85,6 +106,14 @@ export class QuizQuestionsComponent implements OnInit {
         }
       })
     }
+  }
+
+  onCreateQuestion() {
+
+  }
+
+  onUpdateQuestion() {
+
   }
 
   async onUpdateQuesNum(){
@@ -113,10 +142,46 @@ export class QuizQuestionsComponent implements OnInit {
     }
   }
 
+  get answers(): FormArray {
+    return this.createQuestionForm.get('answers') as FormArray;
+  }
+
+  answerForm(answer: string = '', isTrue: boolean = false): FormGroup {
+    return this.fb.group({
+      answer: [answer , [Validators.required]],
+      is_true: [isTrue],
+    })
+  }
+
+  toggleCreateQuestionDialogVisibility() {
+    if (this.visible) {
+      this.resetCreateQuestionForm();
+    }
+    this.visible = !this.visible;
+  }
+
   toggleQuesNumEdit() {
     if (!this.isQuesNumEditing) {
       this.questionNumField = this.quizLevel?.question_num || 0;
     }
     this.isQuesNumEditing = !this.isQuesNumEditing;
+  }
+
+  resetCreateQuestionForm() {
+    this.createQuestionForm.reset({
+      question: '',
+      explanation: '',
+    });
+    this.answers.clear();
+    this.answers.push(this.answerForm('', true));
+    this.answers.push(this.answerForm());
+    
+    this.createQuestionForm.markAsPristine();
+    this.createQuestionForm.markAsUntouched();
+  }
+
+  isFieldInvalid(controlName: string): boolean {
+    const control = this.createQuestionForm.get(controlName);
+    return !!(control && control.touched && control.invalid);
   }
 }
