@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { collection, collectionData, CollectionReference, doc, docData, DocumentData, Firestore, getDoc } from '@angular/fire/firestore';
+import { collection, collectionData, CollectionReference, doc, docData, DocumentData, Firestore, getDoc, serverTimestamp, updateDoc } from '@angular/fire/firestore';
+import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Observable } from 'rxjs';
 
 export interface QuizLevel {
@@ -27,6 +28,7 @@ export interface QuizAnswer {
 })
 export class QuizService {
   private firestore = inject(Firestore);
+  private functions = inject(Functions);
   private levelsRef: CollectionReference<DocumentData>;
 
   levelsCollection = 'quiz_levels';
@@ -48,5 +50,11 @@ export class QuizService {
   getQuestions(levelId: string): Observable<QuizQuestion[]> {
     const questionsRef = collection(this.firestore, `${this.levelsCollection}/${levelId}/${this.questionsCollection}`);
     return collectionData(questionsRef, { idField: 'id' }) as Observable<QuizQuestion[]>;
+  }
+
+  async updateQuizLevel(id: string, payload: Partial<QuizLevel>) {
+    console.log(id);
+    const updateFn = httpsCallable(this.functions, 'updateQuizLevel');
+    return updateFn({docId: id, payload: payload});
   }
 }

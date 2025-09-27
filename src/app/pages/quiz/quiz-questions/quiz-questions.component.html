@@ -1,3 +1,28 @@
-<p>quiz-questions works!</p>
+<div class="flex flex-column gap-3" *ngIf="!isLoading; else loading">
+  @if (quizLevel) {
+  <h1 class="page-h1">
+    Level {{ quizLevel.level + 1 }} - {{ quizLevel.level_name }}
+  </h1>
+  <div class="surface-100 border-round flex flex-column gap-1 p-4">
+    <div class="flex flex-row gap-2 align-items-center vertical-align-middle">
+        <span>Number of questions: </span>
+        @if (!isQuesNumEditing) {
+        <span>{{ quizLevel.question_num }}</span>
+        <p-button icon="pi pi-file-edit" [rounded]="true" [outlined]="true" size="small" (onClick)="toggleQuesNumEdit()"></p-button>
+        } @else {
+            <p-inputnumber inputId="integeronly" [(ngModel)]="questionNumField" [disabled]="isUpdateQuesNumLoading"></p-inputnumber>
+            <p-button label="Cancel" size="small" severity="secondary" (onClick)="toggleQuesNumEdit()" [disabled]="isUpdateQuesNumLoading"></p-button>
+            <p-button label="Update" size="small" (onClick)="onUpdateQuesNum()" [disabled]="questionNumField == quizLevel.question_num || !questionNumField || questionNumField <= 0" [loading]="isUpdateQuesNumLoading"></p-button>
+        }
+    </div>
+  </div>
+  }
+</div>
+<ng-template #loading>
+  <div class="flex flex-column gap-3">
+    <p-skeleton width="15rem" height="3rem" borderRadius="16px" />
+    <p-skeleton width="100%" height="4rem" />
+  </div>
+</ng-template>
 
 <p-toast></p-toast>

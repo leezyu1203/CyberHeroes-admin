@@ -10,7 +10,7 @@
 import {setGlobalOptions} from "firebase-functions";
 import {onCall} from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
-import {getFirestore} from "firebase-admin/firestore";
+import {getFirestore, Timestamp} from "firebase-admin/firestore";
 import {initializeApp} from "firebase-admin/app";
 
 // Start writing functions
@@ -78,6 +78,42 @@ export const deletePhishOrFakeEmail = onCall(async (request) => {
   logger.info(`Email ${docId} deleted by ${uid}`);
 
   return {success: true, message: "Document deleted successfully"};
+});
+
+const levelsCollection = "quiz_levels";
+
+export const updateQuizLevel = onCall(async (request) => {
+  const {docId, payload} = request.data;
+  const uid = request.auth?.uid;
+  if (!uid) {
+    throw new Error("Unauthorized: User must be logged in.");
+  }
+  if (!docId) {
+    throw new Error("Missing docId");
+  }
+
+  if (!payload || typeof payload !== "object") {
+    throw new Error("Invalid request: payload is required.");
+  }
+
+  if ("question_num" in payload) {
+    if (typeof payload.question_num !== "number" || payload.question_num <= 0) {
+      throw new Error("Invalid value: question_num must be > 0");
+    }
+  }
+
+  try {
+    const levelRef = db.collection(levelsCollection).doc(docId);
+    await levelRef.update({
+      ...payload,
+      updatedAt: Timestamp.now(),
+      updatedBy: uid,
+    });
+    logger.info(`Quiz Level ${docId} updated by user ${uid}`);
+  } catch (err) {
+    logger.error("Error updating quiz level", err);
+    throw new Error("Failed to update quiz level.");
+  }
 });
 
 // export const helloWorld = onRequest((request, response) => {
