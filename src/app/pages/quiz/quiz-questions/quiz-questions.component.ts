@@ -153,6 +153,12 @@ export class QuizQuestionsComponent implements OnInit {
     })
   }
 
+  onRemoveAnswerForm(index: number) {
+    if (this.answers.length > 2) {
+      this.answers.removeAt(index);
+    }
+  }
+
   toggleCreateQuestionDialogVisibility() {
     if (this.visible) {
       this.resetCreateQuestionForm();
