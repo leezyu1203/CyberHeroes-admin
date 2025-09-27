@@ -9,10 +9,13 @@ import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { FormsModule } from '@angular/forms';
+import { AccordionModule, AccordionTabOpenEvent } from 'primeng/accordion';
+import { TableModule } from 'primeng/table';
+import { BadgeModule } from 'primeng/badge';
 
 @Component({
   selector: 'app-quiz-questions',
-  imports: [ToastModule, SkeletonModule, CommonModule, ButtonModule, InputNumberModule, FormsModule],
+  imports: [ToastModule, SkeletonModule, CommonModule, ButtonModule, InputNumberModule, FormsModule, AccordionModule, TableModule, BadgeModule],
   templateUrl: './quiz-questions.component.html',
   styleUrl: './quiz-questions.component.scss',
   providers: [MessageService]
@@ -63,6 +66,25 @@ export class QuizQuestionsComponent implements OnInit {
   onError(errMsg: string) {
     this.messageService.add({ severity: 'error', summary: 'Error', detail: errMsg, life: 3000});
     this.router.navigate(['/quiz']);
+  }
+
+  onAccordionOpen(event: AccordionTabOpenEvent) {
+    console.log(event.index);
+    const question: QuizQuestion = this.questions[event.index];
+    const levelId = this.quizLevel?.id;
+    if (!levelId || !question.id) {
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Something went wrong', life: 3000});
+      return;
+    }
+    if (!question.answers) {
+      this.quizService.getQuesAnswers(levelId, question.id).subscribe({
+        next: res => {
+          question.answers = res;
+        }, error: err => {
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
+        }
+      })
+    }
   }
 
   async onUpdateQuesNum(){

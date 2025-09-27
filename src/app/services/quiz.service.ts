@@ -15,6 +15,7 @@ export interface QuizQuestion {
   id?: string;
   explanation: string;
   question: string;
+  answers?: QuizAnswer[];
 }
 
 export interface QuizAnswer {
@@ -31,8 +32,9 @@ export class QuizService {
   private functions = inject(Functions);
   private levelsRef: CollectionReference<DocumentData>;
 
-  levelsCollection = 'quiz_levels';
-  questionsCollection = 'questions'
+  private levelsCollection = 'quiz_levels';
+  private questionsCollection = 'questions';
+  private answersCollection = 'answers';
 
   constructor() { 
     this.levelsRef = collection(this.firestore, this.levelsCollection);
@@ -50,6 +52,11 @@ export class QuizService {
   getQuestions(levelId: string): Observable<QuizQuestion[]> {
     const questionsRef = collection(this.firestore, `${this.levelsCollection}/${levelId}/${this.questionsCollection}`);
     return collectionData(questionsRef, { idField: 'id' }) as Observable<QuizQuestion[]>;
+  }
+
+  getQuesAnswers(levelId: string, questionId: string): Observable<QuizAnswer[]> {
+    const answersRef = collection(this.firestore, `${this.levelsCollection}/${levelId}/${this.questionsCollection}/${questionId}/${this.answersCollection}`);
+    return collectionData(answersRef, { idField: 'id' }) as Observable<QuizAnswer[]>;
   }
 
   async updateQuizLevel(id: string, payload: Partial<QuizLevel>) {
