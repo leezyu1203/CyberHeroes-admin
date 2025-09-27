@@ -14,7 +14,7 @@ import { TableModule } from 'primeng/table';
 import { BadgeModule } from 'primeng/badge';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
-import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { ToggleSwitchChangeEvent, ToggleSwitchModule } from 'primeng/toggleswitch';
 
 @Component({
   selector: 'app-quiz-questions',
@@ -178,6 +178,19 @@ export class QuizQuestionsComponent implements OnInit {
     
     this.createQuestionForm.markAsPristine();
     this.createQuestionForm.markAsUntouched();
+  }
+
+  onSwitchChange(event: ToggleSwitchChangeEvent, index: number) {
+    console.log(`Changed to: ${event.checked}; index: ${index}`);
+    if (event.checked) {
+      this.answers.controls.forEach((ans, i) => {
+        if (i !== index) {
+          if (ans.get('is_true')?.value) {
+            ans.get('is_true')?.setValue(false);
+          }
+        }
+      })
+    }
   }
 
   isFieldInvalid(controlName: string): boolean {
