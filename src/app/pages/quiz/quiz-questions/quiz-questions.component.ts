@@ -108,7 +108,7 @@ export class QuizQuestionsComponent implements OnInit {
     }
   }
 
-  onCreateQuestion() {
+  async onCreateQuestion() {
     if (!this.createQuestionForm.valid) {
       // console.error('Form is invalid');
       this.createQuestionForm.markAllAsTouched();
@@ -117,8 +117,29 @@ export class QuizQuestionsComponent implements OnInit {
     if (this.checkAnswerValidity.noIsTrue || !this.checkAnswerValidity.onlyOne) {
       return;
     }
-    this.toggleCreateQuestionDialogVisibility();
-    this.messageService.add({ severity: 'success', summary: 'Success', detail: 'New question created!', life: 3000 });
+    this.isFormLoading = true;
+    if (this.quizLevel?.id) {
+      const levelId = this.quizLevel.id;
+      const payload = {
+        question: this.createQuestionForm.get('question')?.value,
+        explanation: this.createQuestionForm.get('explanation')?.value,
+        answers: this.createQuestionForm.get('answers')?.value,
+      }
+
+      this.quizService.createQuizQuestion(levelId, payload).subscribe({
+        next: (res: any) => {
+          this.toggleCreateQuestionDialogVisibility();
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'New question created!', life: 3000 });
+        }, error: (err) => {
+          if (err instanceof Error) {
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
+          } else {
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
+          }
+          this.isFormLoading = false;
+        }
+      });
+    }
   }
 
   onUpdateQuestion() {
@@ -202,6 +223,7 @@ export class QuizQuestionsComponent implements OnInit {
       this.resetCreateQuestionForm();
     }
     this.visible = !this.visible;
+    this.isFormLoading = false;
   }
 
   toggleQuesNumEdit() {

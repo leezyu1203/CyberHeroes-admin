@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { collection, collectionData, CollectionReference, doc, docData, DocumentData, Firestore, getDoc, serverTimestamp, updateDoc } from '@angular/fire/firestore';
 import { Functions, httpsCallable } from '@angular/fire/functions';
-import { Observable } from 'rxjs';
+import { from, Observable } from 'rxjs';
 
 export interface QuizLevel {
   id?: string;
@@ -63,5 +63,14 @@ export class QuizService {
     console.log(id);
     const updateFn = httpsCallable(this.functions, 'updateQuizLevel');
     return updateFn({docId: id, payload: payload});
+  }
+
+  createQuizQuestion(id: string, payload: Partial<(QuizQuestion & { isEditing: boolean })>) {
+    const createFn = httpsCallable(this.functions, 'createQuizQuestion');
+    const req = {
+      docId: id,
+      payload: payload,
+    }
+    return from(createFn(req));
   }
 }

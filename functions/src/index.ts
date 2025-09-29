@@ -81,6 +81,8 @@ export const deletePhishOrFakeEmail = onCall(async (request) => {
 });
 
 const levelsCollection = "quiz_levels";
+const questionsCollection = "questions";
+const answersCollection = "answers";
 
 export const updateQuizLevel = onCall(async (request) => {
   const {docId, payload} = request.data;
@@ -113,6 +115,54 @@ export const updateQuizLevel = onCall(async (request) => {
   } catch (err) {
     logger.error("Error updating quiz level", err);
     throw new Error("Failed to update quiz level.");
+  }
+});
+
+export const createQuizQuestion = onCall(async (request) => {
+  const uid = request.auth?.uid;
+  if (!uid) {
+    throw new Error("Unauthorised: User must be logged in.");
+  }
+
+  const {docId, payload} = request.data;
+  if (!docId) {
+    throw new Error("Missing docId");
+  }
+  if (!payload) {
+    throw new Error("Invalid parameter: empty payload");
+  }
+
+  try {
+    const questionsCol = db.collection(levelsCollection)
+      .doc(docId).collection(questionsCollection);
+    const questionRef = questionsCol.doc();
+    const batch = db.batch();
+    const now = Timestamp.now();
+
+    batch.set(questionRef, {
+      question: payload.question,
+      explanation: payload.explanation,
+      createdBy: uid,
+      createdAt: now,
+    });
+    for (const a of payload.answers) {
+      const ansRef = questionRef.collection(answersCollection).doc();
+      batch.set(ansRef, {
+        answer: a.answer,
+        is_true: a.is_true,
+        createdBy: uid,
+        createdAt: now,
+      });
+    }
+
+    await batch.commit();
+    logger.info(
+      `Question ${questionRef.id} created by ${uid} under level ${docId}`
+    );
+    return {status: "ok", questionId: questionRef.id};
+  } catch (err: any) {
+    logger.error("Create question error", err);
+    return {status: "error", message: err?.message || "Unknown error"};
   }
 });
 
