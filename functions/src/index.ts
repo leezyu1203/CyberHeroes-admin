@@ -131,6 +131,9 @@ export const createQuizQuestion = onCall(async (request) => {
   if (!payload) {
     throw new Error("Invalid parameter: empty payload");
   }
+  if (!Array.isArray(payload.answers) || payload.answers.length < 2) {
+    throw new Error("Invalid parameter: Must at least 2 answers in a question");
+  }
 
   try {
     const questionsCol = db.collection(levelsCollection)
@@ -164,6 +167,103 @@ export const createQuizQuestion = onCall(async (request) => {
     logger.error("Create question error", err);
     return {status: "error", message: err?.message || "Unknown error"};
   }
+});
+
+export const updateQuizQuestion = onCall(async (request) => {
+  const uid = request.auth?.uid;
+  if (!uid) {
+    throw new Error("Unauthorized: User must be logged in.");
+  }
+
+  const {levelId, questionId, payload} = request.data;
+  if (!levelId) {
+    throw new Error("Invalid parameter: missing levelId");
+  }
+  if (!questionId) {
+    throw new Error("Invalid parameter: missing questionId");
+  }
+  if (!payload) {
+    throw new Error("Invalid parameter: empty payload");
+  }
+  if (!Array.isArray(payload.answers) || payload.answers.length < 2) {
+    if (!Array.isArray(payload.answers) || payload.answers.length < 2) {
+      throw new Error(
+        "Invalid parameter: Must at least 2 answers in a question"
+      );
+    }
+  }
+
+  try {
+    const questionRef = db.collection(levelsCollection)
+      .doc(levelId)
+      .collection(questionsCollection)
+      .doc(questionId);
+    const batch = db.batch();
+    const now = Timestamp.now();
+    batch.update(questionRef, {
+      question: payload.question,
+      explanation: payload.explanation,
+      updatedBy: uid,
+      updatedAt: now,
+    });
+    const answerSnap = await questionRef.collection(answersCollection).get();
+    answerSnap.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+    for (const a of payload.answers) {
+      const ansRef = questionRef.collection(answersCollection).doc();
+      batch.set(ansRef, {
+        answer: a.answers,
+        is_true: a.is_true,
+        updatedBy: uid,
+        updatedAt: now,
+      });
+    }
+
+    await batch.commit();
+    logger.info(
+      `Question ${questionId} updated by ${uid} under level ${levelId}`
+    );
+    return {status: "ok", questionId: questionId};
+  } catch (err) {
+    logger.error("Create question error", err);
+    throw new Error("Failed to update quiz question.");
+  }
+});
+
+export const deleteQuizQuestion = onCall(async (request) => {
+  const uid = request.auth?.uid;
+  if (!uid) {
+    throw new Error("Unauthorized: User must be logged in.");
+  }
+
+  const {levelId, questionId} = request.data;
+  if (!levelId) {
+    throw new Error("Invalid parameter: missing levelId");
+  }
+  if (!questionId) {
+    throw new Error("Invalid parameter: missing questionId");
+  }
+
+  const levelRef = db.collection(levelsCollection).doc(levelId);
+  const levelSnap = await levelRef.get();
+  if (!levelSnap.exists) {
+    throw new Error("Not found: quiz level not found");
+  }
+
+  const questionNum = levelSnap.get("question_num");
+  const questionsSnap = await levelRef.collection(questionsCollection).get();
+  const totalQuestions = questionsSnap.size;
+  if (totalQuestions <= questionNum) {
+    throw new Error(
+      "Cannot delete. Total # of questions cannot less than the question_num"
+    );
+  }
+
+  await levelRef.collection(questionsCollection).doc(questionId).delete();
+  logger.info(`Level ${levelId}, Question ${questionId} deleted by ${uid}`);
+
+  return {status: "ok", message: "Question deleted successfully"};
 });
 
 // export const helloWorld = onRequest((request, response) => {
