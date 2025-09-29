@@ -213,7 +213,7 @@ export const updateQuizQuestion = onCall(async (request) => {
     for (const a of payload.answers) {
       const ansRef = questionRef.collection(answersCollection).doc();
       batch.set(ansRef, {
-        answer: a.answers,
+        answer: a.answer,
         is_true: a.is_true,
         updatedBy: uid,
         updatedAt: now,

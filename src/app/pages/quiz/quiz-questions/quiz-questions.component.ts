@@ -77,6 +77,7 @@ export class QuizQuestionsComponent implements OnInit {
     this.createQuestionForm = this.fb.group({
       question: ['', [Validators.required]],
       explanation: ['', [Validators.required]],
+      id: [''],
       answers: this.fb.array([
         this.answerForm('', true),
         this.answerForm(),
@@ -142,7 +143,7 @@ export class QuizQuestionsComponent implements OnInit {
     }
   }
 
-  onUpdateQuestion() {
+  async onUpdateQuestion() {
     if (!this.createQuestionForm.valid) {
       // console.error('Form is invalid');
       this.createQuestionForm.markAllAsTouched();
@@ -151,8 +152,31 @@ export class QuizQuestionsComponent implements OnInit {
     if (this.checkAnswerValidity.noIsTrue || !this.checkAnswerValidity.onlyOne) {
       return;
     }
-    this.toggleCreateQuestionDialogVisibility();
-    this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Question is updated!', life: 3000 });
+    this.isFormLoading = true;
+    if (this.quizLevel?.id && this.createQuestionForm.get('id')?.value) {
+      const levelId = this.quizLevel.id;
+      const questionId = this.createQuestionForm.get('id')?.value;
+      const payload = {
+        question: this.createQuestionForm.get('question')?.value,
+        explanation: this.createQuestionForm.get('explanation')?.value,
+        answers: this.createQuestionForm.get('answers')?.value,
+      }
+
+      // console.log(payload);
+      this.quizService.updateQuizQuestion(levelId, questionId, payload).subscribe({
+        next: (res: any) => {
+          this.toggleCreateQuestionDialogVisibility();
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Question is updated!', life: 3000 });
+        }, error: (err) => {
+          if (err instanceof Error) {
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
+          } else {
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
+          }
+          this.isFormLoading = false;
+        }
+      });
+    }
   }
 
   async onUpdateQuesNum(){
@@ -190,6 +214,7 @@ export class QuizQuestionsComponent implements OnInit {
     this.createQuestionForm.patchValue({
       question: editingQues.question,
       explanation: editingQues.explanation,
+      id: editingQues.id,
     });
     this.answers.clear();
     if (editingQues.answers) {
@@ -237,6 +262,7 @@ export class QuizQuestionsComponent implements OnInit {
     this.createQuestionForm.reset({
       question: '',
       explanation: '',
+      id: '',
     });
     this.answers.clear();
     this.answers.push(this.answerForm('', true));

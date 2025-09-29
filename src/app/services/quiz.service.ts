@@ -73,4 +73,14 @@ export class QuizService {
     }
     return from(createFn(req));
   }
+
+  updateQuizQuestion(levelId: string, questionId: string, payload: Partial<(QuizQuestion & { isEditing: boolean })>) {
+    const updateFn = httpsCallable(this.functions, 'updateQuizQuestion');
+    const req = {
+      levelId: levelId,
+      questionId: questionId,
+      payload: payload,
+    }
+    return from(updateFn(req));
+  }
 }
