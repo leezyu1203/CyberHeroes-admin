@@ -83,4 +83,13 @@ export class QuizService {
     }
     return from(updateFn(req));
   }
+  
+  async deleteQuizQuestion(levelId: string, questionId: string) {
+    const deleteFn = httpsCallable(this.functions, 'deleteQuizQuestion');
+    const req = {
+      levelId: levelId,
+      questionId: questionId,
+    }
+    await deleteFn(req);
+  }
 }

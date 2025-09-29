@@ -209,6 +209,24 @@ export class QuizQuestionsComponent implements OnInit {
     }
   }
 
+  async onDeleteQuestion(id: string | undefined) {
+    console.log(id);
+    const levelId = this.quizLevel?.id
+    if (!id || !levelId) {
+      return;
+    }
+    try {
+      await this.quizService.deleteQuizQuestion(levelId, id);
+      this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Question is deleted!', life: 3000 });
+    } catch (err) {
+      if (err instanceof Error) {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
+      } else {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
+      }
+    }
+  }
+
   onEditState(index: number) {
     const editingQues = this.questions[index];
     this.createQuestionForm.patchValue({
