@@ -29,8 +29,8 @@
                 Explanation: {{ ques.explanation }}
               </div>
               <div class="flex flex-row gap-2">
-                <p-button icon="pi pi-file-edit" [rounded]="true" [outlined]="true" size="small"></p-button>
-                <p-button icon="pi pi-trash" [rounded]="true" [outlined]="true" severity="danger" size="small"></p-button>
+                <p-button icon="pi pi-file-edit" [rounded]="true" [outlined]="true" size="small" [disabled]="!ques.answers" (onClick)="onEditState(i)"></p-button>
+                <p-button icon="pi pi-trash" [rounded]="true" [outlined]="true" severity="danger" size="small" [disabled]="questions.length <= quizLevel.question_num"></p-button>
               </div>
             </div>
             <div class="surface-100 border-round p-2 flex flex-column gap-2" *ngIf="ques.answers; else answerLoading">
@@ -90,15 +90,25 @@
         <p-button label="More Answer" icon="pi pi-plus" size="small" (onClick)="answers.push(answerForm())"></p-button>
       </div>
       <div formArrayName="answers" class="flex flex-column gap-2 w-full">
-        <div *ngFor="let ans of answers.controls; let i = index" [formGroupName]="i" class="flex flex-row gap-2">
-          <p-button icon="pi pi-trash" [rounded]="true" [outlined]="true" severity="danger" (onClick)="onRemoveAnswerForm(i)" [disabled]="answers.length <= 2"></p-button>
-          <input pInputText [id]="i" formControlName="answer" placeholder="Answer" class="w-full mr-3" [disabled]="isFormLoading" />
-          <span class="flex flex-row gap-2 align-items-center vertical-align-middle ">
-            <span class="font-light">Correct: </span>
-            <p-toggleswitch [id]="`${i}_is_true`" formControlName="is_true" [disabled]="isFormLoading" (onChange)="onSwitchChange($event, i)"></p-toggleswitch>
-          </span>
+        <div *ngFor="let ans of answers.controls; let i = index" [formGroupName]="i" class="flex flex-column gap-1">
+          <div class="flex flex-row gap-2">
+            <p-button icon="pi pi-trash" [rounded]="true" [outlined]="true" severity="danger" (onClick)="onRemoveAnswerForm(i)" [disabled]="answers.length <= 2"></p-button>
+            <input pInputText [id]="i" formControlName="answer" placeholder="Answer" class="w-full mr-3" [disabled]="isFormLoading" />
+            <span class="flex flex-row gap-2 align-items-center vertical-align-middle ">
+              <span class="font-light">Correct: </span>
+              <p-toggleswitch [id]="`${i}_is_true`" formControlName="is_true" [disabled]="isFormLoading" (onChange)="onSwitchChange($event, i)"></p-toggleswitch>
+            </span>
+          </div>
+          @if (answers.controls[i].get('answer')?.touched && answers.controls[i].get('answer')?.errors?.['required']) {
+            <span class="text-red-500 text-xs">Answer is required</span>
+          }
         </div>
       </div>
+      @if (checkAnswerValidity.noIsTrue) {
+        <span class="text-red-500 text-xs">Must has a correct answer for the question</span>
+      } @else if (!checkAnswerValidity.onlyOne) {
+        <span class="text-red-500 text-xs">Only one correct answer for the question</span>
+      }
     </div>
     <div class="flex justify-content-end gap-2">
         <p-button label="Cancel" severity="secondary" (click)="toggleCreateQuestionDialogVisibility()" [disabled]="isFormLoading" />

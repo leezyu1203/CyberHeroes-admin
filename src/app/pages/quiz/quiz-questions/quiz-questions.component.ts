@@ -109,15 +109,37 @@ export class QuizQuestionsComponent implements OnInit {
   }
 
   onCreateQuestion() {
-
+    if (!this.createQuestionForm.valid) {
+      // console.error('Form is invalid');
+      this.createQuestionForm.markAllAsTouched();
+      return;
+    }
+    if (this.checkAnswerValidity.noIsTrue || !this.checkAnswerValidity.onlyOne) {
+      return;
+    }
+    this.toggleCreateQuestionDialogVisibility();
+    this.messageService.add({ severity: 'success', summary: 'Success', detail: 'New question created!', life: 3000 });
   }
 
   onUpdateQuestion() {
-
+    if (!this.createQuestionForm.valid) {
+      // console.error('Form is invalid');
+      this.createQuestionForm.markAllAsTouched();
+      return;
+    }
+    if (this.checkAnswerValidity.noIsTrue || !this.checkAnswerValidity.onlyOne) {
+      return;
+    }
+    this.toggleCreateQuestionDialogVisibility();
+    this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Question is updated!', life: 3000 });
   }
 
   async onUpdateQuesNum(){
-    if (!this.questionNumField || this.questionNumField <= 0 || this.questionNumField == this.quizLevel?.level) {
+    if (!this.questionNumField || this.questionNumField <= 0 || this.questionNumField == this.quizLevel?.question_num) {
+      return;
+    }
+    if (this.questionNumField > this.questions.length) {
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Cannot update value that exceed the total number of questions in the question bank'});
       return;
     }
     this.isUpdateQuesNumLoading = true;
@@ -140,6 +162,22 @@ export class QuizQuestionsComponent implements OnInit {
         this.isUpdateQuesNumLoading = false;
       }
     }
+  }
+
+  onEditState(index: number) {
+    const editingQues = this.questions[index];
+    this.createQuestionForm.patchValue({
+      question: editingQues.question,
+      explanation: editingQues.explanation,
+    });
+    this.answers.clear();
+    if (editingQues.answers) {
+      editingQues.answers.forEach(ans => {
+        this.answers.push(this.answerForm(ans.answer, ans.is_true));
+      });
+    }
+    this.isQuesEditing = true;
+    this.toggleCreateQuestionDialogVisibility();
   }
 
   get answers(): FormArray {
@@ -184,6 +222,7 @@ export class QuizQuestionsComponent implements OnInit {
     
     this.createQuestionForm.markAsPristine();
     this.createQuestionForm.markAsUntouched();
+    this.isQuesEditing = false;
   }
 
   onSwitchChange(event: ToggleSwitchChangeEvent, index: number) {
@@ -197,6 +236,26 @@ export class QuizQuestionsComponent implements OnInit {
         }
       })
     }
+  }
+
+  get checkAnswerValidity(): { onlyOne?: boolean; noIsTrue?: boolean } {
+    let hasTrue: boolean = false;
+    let moreThanOneTrue: boolean = false;
+
+    for (let ans of this.answers.controls) {
+      if (ans.get('is_true')?.value) {
+        if (!hasTrue) {
+          hasTrue = true;
+        } else {
+          moreThanOneTrue = true;
+          break;
+        }
+      }
+    }
+
+    if (moreThanOneTrue) return { onlyOne: false };
+    if (!hasTrue) return { noIsTrue: true };
+    return { onlyOne: true };
   }
 
   isFieldInvalid(controlName: string): boolean {
