@@ -11,7 +11,12 @@ export const authGuard: CanActivateFn = async() => {
     onAuthStateChanged(auth, (u) => resolve(u))
   );
 
+  const token = await auth.currentUser?.getIdTokenResult();
   if (user) {
+    if (!!token?.claims['is_first_login']) {
+      router.navigate(['/first-time-login']);
+      return false;
+    }
     return true;
   } else {
     router.navigate(['/login']);
@@ -32,5 +37,19 @@ export const noAuthGuard: CanActivateFn = async() => {
     return false;
   } else {
     return true;
+  }
+}
+
+export const firstTimeLoginGuard: CanActivateFn = async() => {
+  const auth = inject(Auth);
+  const router = inject(Router);
+
+  const token = await auth.currentUser?.getIdTokenResult();
+  // console.log(token?.claims['is_first_login']);
+  if (!!token?.claims['is_first_login']) {
+    return true;
+  } else {
+    router.navigate(['/']);
+    return false;
   }
 }

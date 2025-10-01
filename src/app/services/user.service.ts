@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { Auth, onAuthStateChanged, signOut, User } from '@angular/fire/auth';
+import { Auth, onAuthStateChanged, signOut, updatePassword, User } from '@angular/fire/auth';
 import { Firestore, doc, docData} from '@angular/fire/firestore';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { BehaviorSubject, from, map, Observable } from 'rxjs';
@@ -45,8 +45,8 @@ export class UserService {
     await signOut(this.auth);
   }
 
-  async setSuperAdminClaim() {
-    const setClaim = httpsCallable(this.functions, 'setSuperAdminClaim');
+  async setCustomClaims() {
+    const setClaim = httpsCallable(this.functions, 'setCustomClaims');
     await setClaim({});
   }
 
@@ -69,5 +69,10 @@ export class UserService {
   deleteAdmin(targetUid: string) {
     const deleteFn = httpsCallable(this.functions, 'deleteAdmin');
     return from(deleteFn({targetUid}));
+  }
+
+  updatePassword(password: string) {
+    const updateFn = httpsCallable(this.functions, 'updatePassword');
+    return from(updateFn({password}));
   }
 }

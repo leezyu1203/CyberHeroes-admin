@@ -28,7 +28,7 @@ export class LoginComponent {
   }
 
   async onLogin() {
-    console.log("Sign In button clicked")
+    // console.log("Sign In button clicked")
     if (!this.loginForm.valid) {
       this.loginForm.markAllAsTouched();
       return;
@@ -38,12 +38,12 @@ export class LoginComponent {
       await signInWithEmailAndPassword(this.auth, email, password);
       const user = await this.auth.currentUser;
       if (user) {
-        await this.userService.setSuperAdminClaim();
+        await this.userService.setCustomClaims();
         await user.getIdToken(true);
-        // console.log((await user.getIdTokenResult()).claims['is_superadmin']);
+        this.router.navigate(['/first-time-login']);
+        // console.log((await user.getIdTokenResult()).claims['is_first_login']);
       }
       // alert('Login successfull!');
-      this.router.navigate(['/']);
     } catch (err: any) {
       alert("Something sent wrong.\n" + err.message);
     }

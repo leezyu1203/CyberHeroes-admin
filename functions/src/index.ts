@@ -269,20 +269,30 @@ export const deleteQuizQuestion = onCall(async (request) => {
 
 const adminCollection = "admins";
 
-export const setSuperAdminClaim = onCall(async (request) => {
+/**
+ * Help to apply custom claims to auth token
+ * @param {string} uid the current user uid.
+ */
+async function applyCustomClaims(uid: string) {
+  const adminDoc = await db.collection(adminCollection).doc(uid).get();
+  const data = adminDoc.data();
+
+  const isSuperadmin = !!data?.is_superadmin;
+  const isFirstLogin = !!data?.is_first_login;
+
+  await admin.auth().setCustomUserClaims(
+    uid,
+    {is_superadmin: isSuperadmin, is_first_login: isFirstLogin}
+  );
+}
+
+export const setCustomClaims = onCall(async (request) => {
   const uid = request.auth?.uid;
   if (!uid) {
     throw new Error("Unauthorized: User must be logged in.");
   }
 
-  const adminDoc = await db.collection(adminCollection).doc(uid).get();
-  const data = adminDoc.data();
-
-  if (data?.is_superadmin) {
-    await admin.auth().setCustomUserClaims(uid, {is_superadmin: true});
-  } else {
-    await admin.auth().setCustomUserClaims(uid, {is_superadmin: false});
-  }
+  await applyCustomClaims(uid);
 });
 
 export const getAdminList = onCall(async (request) => {
@@ -375,6 +385,37 @@ export const deleteAdmin = onCall(async (request) => {
     };
   } catch (err) {
     throw new Error("Failed to delete admin.");
+  }
+});
+
+export const updatePassword = onCall(async (request) => {
+  const uid = request.auth?.uid;
+  if (!uid) {
+    throw new Error("Unauthorized: User must be logged in.");
+  }
+
+  const {password} = request.data;
+  if (!password) {
+    throw new Error("Invalid parameter: empty payload");
+  }
+
+  try {
+    await admin.auth().updateUser(uid, {password: password});
+
+    const token = request.auth?.token;
+    if (token?.is_first_login) {
+      const docRef = await db.collection(adminCollection).doc(uid);
+      await docRef.update({
+        is_first_login: false,
+        updatedAt: Timestamp.now(),
+        updatedBy: uid,
+      });
+      await applyCustomClaims(uid);
+    }
+    logger.info(`User admin ${uid} updated password`);
+    return {status: "ok", message: "Password updated successfully"};
+  } catch (err) {
+    throw new Error("Failed to update password.");
   }
 });
 
