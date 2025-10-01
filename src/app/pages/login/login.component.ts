@@ -7,6 +7,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth';
 import { CommonModule } from "@angular/common";
 import { Router } from '@angular/router';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +18,7 @@ import { Router } from '@angular/router';
 export class LoginComponent {
   loginForm!: FormGroup
 
-  constructor(private fb: FormBuilder, private auth: Auth, private router: Router) {}
+  constructor(private fb: FormBuilder, private auth: Auth, private router: Router, private userService: UserService) {}
 
   ngOnInit() {
     this.loginForm = this.fb.group({
@@ -35,6 +36,12 @@ export class LoginComponent {
     const { email, password } = this.loginForm.value;
     try {
       await signInWithEmailAndPassword(this.auth, email, password);
+      const user = await this.auth.currentUser;
+      if (user) {
+        await this.userService.setSuperAdminClaim();
+        await user.getIdToken(true);
+        // console.log((await user.getIdTokenResult()).claims['is_superadmin']);
+      }
       // alert('Login successfull!');
       this.router.navigate(['/']);
     } catch (err: any) {

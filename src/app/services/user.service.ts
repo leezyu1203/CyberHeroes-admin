@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Auth, onAuthStateChanged, signOut, User } from '@angular/fire/auth';
 import { Firestore, doc, docData} from '@angular/fire/firestore';
+import { Functions, httpsCallable } from '@angular/fire/functions';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
@@ -9,6 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 export class UserService {
   private auth = inject(Auth);
   private firestore = inject(Firestore);
+  private functions = inject(Functions);
 
   private userSubject = new BehaviorSubject<any>(null);
   currentUser$ = this.userSubject.asObservable();
@@ -31,5 +33,10 @@ export class UserService {
 
   async logout(): Promise<void> {
     await signOut(this.auth);
+  }
+
+  async setSuperAdminClaim() {
+    const setClaim = httpsCallable(this.functions, 'setSuperAdminClaim');
+    await setClaim({});
   }
 }

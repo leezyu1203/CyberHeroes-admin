@@ -12,6 +12,7 @@ import {onCall} from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 import {getFirestore, Timestamp} from "firebase-admin/firestore";
 import {initializeApp} from "firebase-admin/app";
+import * as admin from "firebase-admin";
 
 // Start writing functions
 // https://firebase.google.com/docs/functions/typescript
@@ -264,6 +265,24 @@ export const deleteQuizQuestion = onCall(async (request) => {
   logger.info(`Level ${levelId}, Question ${questionId} deleted by ${uid}`);
 
   return {status: "ok", message: "Question deleted successfully"};
+});
+
+const adminCollection = "admins";
+
+export const setSuperAdminClaim = onCall(async (request) => {
+  const uid = request.auth?.uid;
+  if (!uid) {
+    throw new Error("Unauthorized: User must be logged in.");
+  }
+
+  const adminDoc = await db.collection(adminCollection).doc(uid).get();
+  const data = adminDoc.data();
+
+  if (data?.is_superadmin) {
+    await admin.auth().setCustomUserClaims(uid, {is_superadmin: true});
+  } else {
+    await admin.auth().setCustomUserClaims(uid, {is_superadmin: false});
+  }
 });
 
 // export const helloWorld = onRequest((request, response) => {
