@@ -308,6 +308,41 @@ export const getAdminList = onCall(async (request) => {
   }
 });
 
+export const createAdmin = onCall(async (request) => {
+  const uid = request.auth?.uid;
+  if (!uid) {
+    throw new Error("Unauthorized: User must be logged in.");
+  }
+
+  const token = request.auth?.token;
+  if (!token?.is_superadmin) {
+    throw new Error("Permission denied: not a superadmin");
+  }
+
+  const {password, payload} = request.data;
+  if (!password || !payload) {
+    throw new Error("Invalid parameter");
+  }
+
+  try {
+    const newUser = await admin.auth().createUser({
+      email: payload.email,
+      password: password,
+      displayName: payload.username,
+    });
+    await db.collection(adminCollection).doc(newUser.uid).set({
+      username: payload.username,
+      email: payload.email,
+      is_superadmin: payload.is_superadmin,
+      createdBy: uid,
+      createdAt: Timestamp.now(),
+    });
+    return {status: "ok", message: "Admin account created.", uid: uid};
+  } catch (err) {
+    throw new Error("Failed to create admin");
+  }
+});
+
 // export const helloWorld = onRequest((request, response) => {
 //   logger.info("Hello logs!", {structuredData: true});
 //   response.send("Hello from Firebase!");

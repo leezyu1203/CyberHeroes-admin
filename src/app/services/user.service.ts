@@ -10,6 +10,7 @@ export interface Admin {
   failed_attempts: number;
   is_superadmin: boolean;
   username: string;
+  email: string;
   is_first_login: boolean;
 }
 
@@ -54,5 +55,14 @@ export class UserService {
     return from(readFn()).pipe(
       map((res: any) => res.data.admins as Admin[])
     )
+  }
+
+  createAdmin(payload: Admin, password: string) {
+    const createFn = httpsCallable(this.functions, 'createAdmin');
+    const req = {
+      password: password,
+      payload: payload,
+    }
+    return from(createFn(req));
   }
 }

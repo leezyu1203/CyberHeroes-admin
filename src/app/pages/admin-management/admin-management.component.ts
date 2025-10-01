@@ -13,16 +13,20 @@ import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { TableModule } from 'primeng/table';
 import { BadgeModule } from 'primeng/badge';
+import { catchError, of, switchMap, tap } from 'rxjs';
+import { SkeletonModule } from 'primeng/skeleton';
 
 @Component({
   selector: 'app-admin-management',
-  imports: [CardModule, NgIf, AsyncPipe, ButtonModule, Dialog, InputText, ReactiveFormsModule, CommonModule, ToggleSwitchModule, ToastModule, TableModule, BadgeModule],
+  imports: [CardModule, NgIf, AsyncPipe, ButtonModule, Dialog, InputText, ReactiveFormsModule, CommonModule, ToggleSwitchModule, ToastModule, TableModule, BadgeModule, SkeletonModule],
   templateUrl: './admin-management.component.html',
   styleUrl: './admin-management.component.scss',
   providers: [MessageService]
 })
 export class AdminManagementComponent implements OnInit {
   visible: boolean = false;
+  isFormLoading: boolean = false;
+  isAdminListLoading: boolean = false;
   createAdminForm!: FormGroup;
   admins: Admin[] = [];
 
@@ -38,15 +42,8 @@ export class AdminManagementComponent implements OnInit {
 
     const token = await this.auth.currentUser?.getIdTokenResult();
     if (token && !!token.claims['is_superadmin']) {
-      this.userService.getAdminList().subscribe({
-        next: res => {
-          this.admins = res;
-          console.log(this.admins)
-        },
-        error: err => {
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
-        }
-      })
+      this.isAdminListLoading = true;
+      await this.loadAdminList();
     }
   }
 
@@ -56,11 +53,51 @@ export class AdminManagementComponent implements OnInit {
   }
   
   async onCreateAdmin() {
-    this.toggleCreateAdminDialogVisibility();
+    if (!this.createAdminForm.valid) {
+      this.createAdminForm.markAllAsTouched();
+      return;
+    }
+    this.isFormLoading = true;
+    const payload: Admin = {
+      username: this.createAdminForm.get('username')?.value,
+      email: this.createAdminForm.get('email')?.value,
+      is_superadmin: this.createAdminForm.get('isSuperadmin')?.value,
+      disabled: false,
+      failed_attempts: 0,
+      is_first_login: true,
+    }
+    const password: string = this.createAdminForm.get('password')?.value;
+    // console.log(payload, password);
+    this.userService.createAdmin(payload, password).pipe(
+      switchMap(() => this.loadAdminList()),
+      tap(() => {
+        this.toggleCreateAdminDialogVisibility();
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'New admin created!', life: 3000 });
+      }), 
+      catchError((err) => {
+        if (err instanceof Error) {
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
+        } else {
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
+        }
+        this.isFormLoading = false;
+        return of(null);
+      })
+    ).subscribe();
   }
 
-  get isSuperadmin(): boolean {
-    return false;
+  async loadAdminList() {
+    this.userService.getAdminList().subscribe({
+      next: res => {
+        this.admins = res;
+        this.isAdminListLoading = false;
+        console.log(this.admins)
+      },
+      error: err => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
+        this.isAdminListLoading = false;
+      }
+    });
   }
 
   toggleCreateAdminDialogVisibility() {
