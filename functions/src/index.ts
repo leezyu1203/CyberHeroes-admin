@@ -334,12 +334,47 @@ export const createAdmin = onCall(async (request) => {
       username: payload.username,
       email: payload.email,
       is_superadmin: payload.is_superadmin,
+      disabled: payload.disabled,
+      failed_attempts: payload.failed_attempts,
+      is_first_login: payload.is_first_login,
       createdBy: uid,
       createdAt: Timestamp.now(),
     });
     return {status: "ok", message: "Admin account created.", uid: uid};
   } catch (err) {
     throw new Error("Failed to create admin");
+  }
+});
+
+export const deleteAdmin = onCall(async (request) => {
+  const uid = request.auth?.uid;
+  if (!uid) {
+    throw new Error("Unauthorized: User must be logged in.");
+  }
+
+  const token = request.auth?.token;
+  if (!token?.is_superadmin) {
+    throw new Error("Permission denied: not a superadmin");
+  }
+
+  const {targetUid} = request.data;
+  if (!targetUid) {
+    throw new Error("Invalid parameter");
+  }
+  if (targetUid === uid) {
+    throw new Error("Internal error: cannot delete user itself");
+  }
+
+  try {
+    await db.collection(adminCollection).doc(targetUid).delete();
+    await admin.auth().deleteUser(targetUid);
+    logger.info(`User admin ${targetUid} deleted by ${uid}`);
+    return {
+      status: "ok",
+      message: `Superadmin ${uid} delete user admin ${targetUid}`,
+    };
+  } catch (err) {
+    throw new Error("Failed to delete admin.");
   }
 });
 

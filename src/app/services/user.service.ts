@@ -65,4 +65,9 @@ export class UserService {
     }
     return from(createFn(req));
   }
+
+  deleteAdmin(targetUid: string) {
+    const deleteFn = httpsCallable(this.functions, 'deleteAdmin');
+    return from(deleteFn({targetUid}));
+  }
 }

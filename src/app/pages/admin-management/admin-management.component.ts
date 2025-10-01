@@ -42,7 +42,6 @@ export class AdminManagementComponent implements OnInit {
 
     const token = await this.auth.currentUser?.getIdTokenResult();
     if (token && !!token.claims['is_superadmin']) {
-      this.isAdminListLoading = true;
       await this.loadAdminList();
     }
   }
@@ -86,7 +85,26 @@ export class AdminManagementComponent implements OnInit {
     ).subscribe();
   }
 
+  async onDeleteAdmin(targetUid: string) {
+    this.userService.deleteAdmin(targetUid).pipe(
+      switchMap(() => this.loadAdminList()),
+      tap(() => {
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Message is deleted!', life: 3000 });
+      }),
+      catchError((err) => {
+        if (err instanceof Error) {
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
+        } else {
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
+        }
+        this.isFormLoading = false;
+        return of(null);
+      })
+    ).subscribe();
+  }
+
   async loadAdminList() {
+    this.isAdminListLoading = true;
     this.userService.getAdminList().subscribe({
       next: res => {
         this.admins = res;
