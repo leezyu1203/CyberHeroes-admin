@@ -2,7 +2,16 @@ import { inject, Injectable } from '@angular/core';
 import { Auth, onAuthStateChanged, signOut, User } from '@angular/fire/auth';
 import { Firestore, doc, docData} from '@angular/fire/firestore';
 import { Functions, httpsCallable } from '@angular/fire/functions';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, from, map, Observable } from 'rxjs';
+
+export interface Admin {
+  uid?: string;
+  disabled: boolean;
+  failed_attempts: number;
+  is_superadmin: boolean;
+  username: string;
+  is_first_login: boolean;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -38,5 +47,12 @@ export class UserService {
   async setSuperAdminClaim() {
     const setClaim = httpsCallable(this.functions, 'setSuperAdminClaim');
     await setClaim({});
+  }
+
+  getAdminList(): Observable<Admin[]> {
+    const readFn = httpsCallable(this.functions, 'getAdminList');
+    return from(readFn()).pipe(
+      map((res: any) => res.data.admins as Admin[])
+    )
   }
 }

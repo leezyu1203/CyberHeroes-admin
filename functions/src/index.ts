@@ -285,6 +285,29 @@ export const setSuperAdminClaim = onCall(async (request) => {
   }
 });
 
+export const getAdminList = onCall(async (request) => {
+  const uid = request.auth?.uid;
+  if (!uid) {
+    throw new Error("Unauthorized: User must be logged in.");
+  }
+
+  const token = request.auth?.token;
+  if (!token?.is_superadmin) {
+    throw new Error("Permission denied: not a superadmin");
+  }
+
+  try {
+    const snapshot = await db.collection(adminCollection).get();
+    const admins = snapshot.docs.map((doc) => ({
+      uid: doc.id,
+      ...doc.data(),
+    }));
+    return {admins};
+  } catch (err) {
+    throw new Error("Failed to fetch admin list.");
+  }
+});
+
 // export const helloWorld = onRequest((request, response) => {
 //   logger.info("Hello logs!", {structuredData: true});
 //   response.send("Hello from Firebase!");
