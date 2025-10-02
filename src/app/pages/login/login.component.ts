@@ -17,6 +17,7 @@ import { UserService } from '../../services/user.service';
 })
 export class LoginComponent {
   loginForm!: FormGroup
+  isLoading: boolean = false;
 
   constructor(private fb: FormBuilder, private auth: Auth, private router: Router, private userService: UserService) {}
 
@@ -33,6 +34,7 @@ export class LoginComponent {
       this.loginForm.markAllAsTouched();
       return;
     }
+    this.isLoading = true;
     const { email, password } = this.loginForm.value;
     try {
       await signInWithEmailAndPassword(this.auth, email, password);
@@ -46,6 +48,8 @@ export class LoginComponent {
       // alert('Login successfull!');
     } catch (err: any) {
       alert("Something sent wrong.\n" + err.message);
+    } finally {
+      this.isLoading = false;
     }
   }
 

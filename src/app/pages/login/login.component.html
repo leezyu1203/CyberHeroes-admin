@@ -10,7 +10,8 @@
             <div>
                 <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
                     <p-floatlabel class="mt-5">
-                        <input pInputText type="email" formControlName="email" class="w-full" [ngClass]="isFieldInvalid('email') ? 'ng-invalid ng-dirty': null" />
+                        <input pInputText type="email" formControlName="email" class="w-full" 
+                            [ngClass]="isFieldInvalid('email') ? 'ng-invalid ng-dirty': null" [attr.disabled]="isLoading" />
                         <label>Email</label>
                     </p-floatlabel>
                     @if (isFieldInvalid('email')) {
@@ -19,7 +20,8 @@
                     } 
 
                     <p-floatlabel class="mt-5">
-                        <input pInputText type="password" formControlName="password" class="w-full" [ngClass]="isFieldInvalid('password') ? 'ng-invalid ng-dirty': null" />
+                        <input pInputText type="password" formControlName="password" class="w-full" 
+                            [ngClass]="isFieldInvalid('password') ? 'ng-invalid ng-dirty': null" [attr.disabled]="isLoading" />
                         <label>Password</label>
                     </p-floatlabel>
                     @if (isFieldInvalid('password')) {
@@ -27,7 +29,7 @@
                     } 
 
                     <div class="flex justify-content-center mt-4">
-                        <p-button label="Sign In" [rounded]="true" type="submit"></p-button>
+                        <p-button label="Sign In" [rounded]="true" type="submit" [loading]="isLoading"></p-button>
                     </div>
                     
                 </form>

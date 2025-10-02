@@ -15,26 +15,55 @@
         <form [formGroup]="resetPasswordForm" (ngSubmit)="onResetPassword()">
           <p-floatlabel class="mt-5">
             <input pInputText type="password" formControlName="password" class="w-full"
-              [ngClass]="isFieldInvalid('password') ? 'ng-invalid ng-dirty' : null"
+              [ngClass]="isFieldInvalid('password') ? 'ng-invalid ng-dirty' : null" [attr.disabled]="isLoading"
             />
             <label>Password</label>
           </p-floatlabel>
           @if (isFieldInvalid('password')) {
-          <span class="text-red-500 text-xs">This field is required</span>
+          <span class="text-red-500 text-xs">
+            @if (resetPasswordForm.get('password')?.hasError('required')) {
+              This field is required
+            } @else if (resetPasswordForm.get('password')?.hasError('digit')) {
+              Must include at least one digit
+            } @else if (resetPasswordForm.get('password')?.hasError('upperLower')) {
+              Must include at least one uppercase and one lowercase
+            } @else if (resetPasswordForm.get('password')?.hasError('specialChar')) {
+              Must include at least one special character (e.g., ! &#64; # $ % ^ & *)
+            } @else if (resetPasswordForm.get('password')?.hasError('minlength')) {
+              Must be at least 8 characters long
+            }
+          </span>
           }
+          <div class="text-xs text-color-secondary mt-2">
+            The password must:<br>
+            • be at least 8 characters long<br>
+            • include at least one uppercase and one lowercase letter<br>
+            • include at least one digit<br>
+            • include at least one special character (e.g., !&#64;#$%^&*)
+          </div>
 
           <p-floatlabel class="mt-5">
             <input pInputText type="password" formControlName="confirm_password" class="w-full"
-              [ngClass]="isFieldInvalid('confirm_password') ? 'ng-invalid ng-dirty' : null"
+              [ngClass]="isFieldInvalid('confirm_password') ? 'ng-invalid ng-dirty' : null" [attr.disabled]="isLoading"
             />
             <label>Confirm Password</label>
           </p-floatlabel>
           @if (isFieldInvalid('confirm_password')) {
-          <span class="text-red-500 text-xs">This field is required</span>
+          <span class="text-red-500 text-xs">
+            @if (resetPasswordForm.get('confirm_password')?.hasError('required')) {
+              This field is required
+            } @else if (resetPasswordForm.get('confirm_password')?.hasError('matchPassword')) {
+              The password not match
+            }
+          </span>
           }
 
-          <div class="flex justify-content-center mt-4">
-            <p-button label="Confirm" [rounded]="true" type="submit"></p-button>
+          <div class="flex justify-content-start mt-2 text-sm">
+            <p-button label="Not ready yet? Try later." [link]="true" size="small" (onClick)="onLogout()" />
+          </div>
+
+          <div class="flex justify-content-center mt-3">
+            <p-button label="Confirm" [rounded]="true" type="submit" [loading]="isLoading"></p-button>
           </div>
         </form>
       </div>
