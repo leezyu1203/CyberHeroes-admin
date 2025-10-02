@@ -7,18 +7,22 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { InputTextModule } from 'primeng/inputtext';
 import { UserService } from '../../services/user.service';
 import { Router } from '@angular/router';
+import { Auth, EmailAuthProvider, getAuth, reauthenticateWithCredential } from '@angular/fire/auth';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-first-time-login',
-  imports: [CardModule, InputTextModule, FloatLabelModule, ReactiveFormsModule, ButtonModule, CommonModule],
+  imports: [CardModule, InputTextModule, FloatLabelModule, ReactiveFormsModule, ButtonModule, CommonModule, ToastModule],
   templateUrl: './first-time-login.component.html',
-  styleUrl: './first-time-login.component.scss'
+  styleUrl: './first-time-login.component.scss',
+  providers: [MessageService]
 })
 export class FirstTimeLoginComponent implements OnInit {
   isLoading: boolean = false;
   resetPasswordForm!: FormGroup;
 
-  constructor(private fb: FormBuilder, private userService: UserService, private router: Router) {}
+  constructor(private fb: FormBuilder, private userService: UserService, private router: Router, private auth: Auth, private messageService: MessageService) {}
 
   ngOnInit() {
     this.resetPasswordForm = this.fb.group({
@@ -35,7 +39,25 @@ export class FirstTimeLoginComponent implements OnInit {
     this.isLoading = true;
     const password = this.resetPasswordForm.get('password')?.value;
     if (password) {
-
+      this.userService.updatePassword(password).subscribe({
+        next: async (res) => {
+          const auth = getAuth();
+          const user = auth.currentUser;
+          if (user && user.email) {
+            const credential = EmailAuthProvider.credential(user.email, password);
+            await reauthenticateWithCredential(user, credential);
+            await user.getIdToken(true);
+          }
+          this.router.navigate(['/']);
+        }, error: (err) => {
+          this.isLoading = false;
+          if (err instanceof Error) {
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
+          } else {
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
+          }
+        }
+      })
     }
   }
 

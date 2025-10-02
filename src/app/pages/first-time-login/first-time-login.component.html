@@ -7,7 +7,7 @@
     </ng-template>
     <ng-template #subtitle>
       <div class="text-xs text-center">
-        Fisrt time login? Reset a new password now!
+        First time login? Reset a new password now!
       </div>
     </ng-template>
     <ng-template #content>
@@ -59,7 +59,7 @@
           }
 
           <div class="flex justify-content-start mt-2 text-sm">
-            <p-button label="Not ready yet? Try later." [link]="true" size="small" (onClick)="onLogout()" />
+            <p-button label="Not ready yet? Try later." [link]="true" size="small" (onClick)="onLogout()" [disabled]="isLoading" />
           </div>
 
           <div class="flex justify-content-center mt-3">
@@ -70,3 +70,5 @@
     </ng-template>
   </p-card>
 </div>
+
+<p-toast></p-toast>
