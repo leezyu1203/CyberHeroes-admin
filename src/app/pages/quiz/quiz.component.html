@@ -1,0 +1,30 @@
+<div class="flex flex-column gap-2">
+  <h1 class="page-h1">Quiz</h1>
+  <div class="surface-100 border-round flex flex-column gap-3 p-4" *ngIf="!isLoading, else loading">
+    <button
+    *ngFor="let level of quizLevels"
+      pButton
+      [outlined]="true"
+      [raised]="true"
+      [routerLink]="['/quiz', level.id]"
+      class="w-full h-full"
+    >
+      <div
+        class="flex flex-column w-full h-full justify-content-start align-contents-start gap-2 p-2 text-left"
+      >
+        <div class="flex flex-row gap-4 text-2xl">
+          <span class="font-bold">Level {{ level.level + 1 }}</span>
+          <span class="font-medium">{{ level.level_name }}</span>
+        </div>  
+        <div class="font-light text-sm text-color-secondary">
+          Number of the questions: {{ level.question_num }}
+        </div>
+      </div>
+    </button>
+  </div>
+  <ng-template #loading>
+    <p-skeleton width="100%" height="4rem" />
+  </ng-template>
+</div>
+
+<p-toast></p-toast>

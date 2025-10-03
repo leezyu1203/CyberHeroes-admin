@@ -1,2 +1,17 @@
 /* You can add global styles to this file, and also import other style files */
 @import 'primeflex/primeflex.scss';
+@import "primeicons/primeicons.css";
+
+body {
+    margin: 0;
+}
+
+.page-h1 {
+    margin-bottom: 0.5rem;
+    color: var(--p-green-900);
+}
+
+.page-h2 {
+    margin-bottom: 0.5rem;
+    color: var(--p-green-700);
+}
