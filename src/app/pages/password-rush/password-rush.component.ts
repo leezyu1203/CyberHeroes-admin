@@ -9,27 +9,28 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { ToastModule } from 'primeng/toast';
 import { TableModule } from 'primeng/table';
 import { PasswordRushService, Rule } from '../../services/password-rush.service';
+import { AccordionModule } from 'primeng/accordion';
 
 @Component({
   selector: 'app-password-rush',
-  imports: [ButtonModule, InputTextModule, ReactiveFormsModule, CommonModule, Dialog, SkeletonModule, ToastModule, TableModule],
+  imports: [ButtonModule, InputTextModule, ReactiveFormsModule, CommonModule, Dialog, SkeletonModule, ToastModule, AccordionModule],
   templateUrl: './password-rush.component.html',
   styleUrl: './password-rush.component.scss',
   providers: [MessageService]
 })
 export class PasswordRushComponent implements OnInit {
-  visible: boolean = false;
+  // visible: boolean = false;
   isLoading: boolean = true;
-  createRuleForm!: FormGroup;
+  // createRuleForm!: FormGroup;
   rules: Rule[] = [];
 
   constructor(private fb: FormBuilder, private prService: PasswordRushService, private messageService: MessageService) {}
 
   ngOnInit() {
-    this.createRuleForm = this.fb.group({
-      description: ['', [Validators.required]],
-      words: ['', [Validators.required]],
-    });
+    // this.createRuleForm = this.fb.group({
+    //   description: ['', [Validators.required]],
+    //   words: ['', [Validators.required]],
+    // });
     this.prService.getRules().subscribe({
       next: res => {
         this.rules = res;
@@ -42,26 +43,36 @@ export class PasswordRushComponent implements OnInit {
     })
   }
 
-  async onCreateRule() {
-    this.toggleCreateRuleDialogVisibility();
+  includeFormat(str: string) {
+    const hasFormat = /[%]/.test(str);
+    return hasFormat;
   }
 
-  toggleCreateRuleDialogVisibility() {
-    if (this.visible) {
-      this.resetCreateRuleForm();
-    }
-    this.visible = !this.visible;
+  formatString(str: string) {
+    return str.replace(/%d/g, "{ random_number }")
+      .replace(/%s/g, "{ random_word(s) }");
   }
 
-  resetCreateRuleForm() {
-    this.createRuleForm.reset({
-      description: '',
-      words: '',
-    });
-  }
+  // async onCreateRule() {
+  //   this.toggleCreateRuleDialogVisibility();
+  // }
 
-  isFieldInvalid(controlName: string): boolean {
-    const control = this.createRuleForm.get(controlName);
-    return !!(control && control.touched && control.invalid);
-  }
+  // toggleCreateRuleDialogVisibility() {
+  //   if (this.visible) {
+  //     this.resetCreateRuleForm();
+  //   }
+  //   this.visible = !this.visible;
+  // }
+
+  // resetCreateRuleForm() {
+  //   this.createRuleForm.reset({
+  //     description: '',
+  //     words: '',
+  //   });
+  // }
+
+  // isFieldInvalid(controlName: string): boolean {
+  //   const control = this.createRuleForm.get(controlName);
+  //   return !!(control && control.touched && control.invalid);
+  // }
 }
