@@ -72,6 +72,7 @@ export class AdminManagementComponent implements OnInit {
       tap(() => {
         this.toggleCreateAdminDialogVisibility();
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'New admin created!', life: 3000 });
+        this.isFormLoading = false;
       }), 
       catchError((err) => {
         if (err instanceof Error) {
@@ -89,7 +90,7 @@ export class AdminManagementComponent implements OnInit {
     this.userService.deleteAdmin(targetUid).pipe(
       switchMap(() => this.loadAdminList()),
       tap(() => {
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Message is deleted!', life: 3000 });
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Admin is deleted!', life: 3000 });
       }),
       catchError((err) => {
         if (err instanceof Error) {
@@ -97,7 +98,6 @@ export class AdminManagementComponent implements OnInit {
         } else {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
         }
-        this.isFormLoading = false;
         return of(null);
       })
     ).subscribe();

@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
-import { Auth, onAuthStateChanged, signOut, updatePassword, User } from '@angular/fire/auth';
+import { Auth, onAuthStateChanged, sendEmailVerification, signOut, User, reload } from '@angular/fire/auth';
 import { Firestore, doc, docData} from '@angular/fire/firestore';
 import { Functions, httpsCallable } from '@angular/fire/functions';
-import { BehaviorSubject, from, map, Observable } from 'rxjs';
+import { BehaviorSubject, from, map, Observable, switchMap, throwError } from 'rxjs';
 
 export interface Admin {
   uid?: string;
@@ -31,7 +31,7 @@ export class UserService {
         const userDocRef = doc(this.firestore, 'admins', user.uid);
         docData(userDocRef, { idField: 'uid' }).subscribe(profile => {
           this.userSubject.next({
-            ...user,
+            firebaseUser: user,
             ...profile
           });
         });
@@ -48,6 +48,12 @@ export class UserService {
   async setCustomClaims() {
     const setClaim = httpsCallable(this.functions, 'setCustomClaims');
     await setClaim({});
+  }
+
+  async sendEmailVerification(): Promise<void> {
+    const user = this.userSubject.getValue();
+    if (!user?.firebaseUser) throw new Error('No user found');
+    await sendEmailVerification(user.firebaseUser);
   }
 
   getAdminList(): Observable<Admin[]> {
@@ -72,7 +78,18 @@ export class UserService {
   }
 
   updatePassword(password: string) {
-    const updateFn = httpsCallable(this.functions, 'updatePassword');
-    return from(updateFn({password}));
+    const currentUser = this.auth.currentUser
+    if (!currentUser) {
+      return throwError(() => new Error('User not logged in.'))
+    }
+    return from(reload(currentUser)).pipe(
+      switchMap(() => {
+        if (!currentUser.emailVerified) {
+          return throwError(() => new Error('Please verify your email before changing password.'))
+        }
+        const updateFn = httpsCallable(this.functions, 'updatePassword');
+        return from(updateFn({password}));
+      })
+    )
   }
 }

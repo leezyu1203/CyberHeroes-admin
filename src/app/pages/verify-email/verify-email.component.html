@@ -1,0 +1,43 @@
+<div
+  class="max-w-sm min-h-screen flex justify-content-center align-items-center bg-green-50"
+>
+  <p-card class="w-28rem">
+    <ng-template #title>
+      <div class="text-center pt-3 pb-2 text-yellow-500">
+        <i class="pi pi-exclamation-circle" style="font-size: 4rem"></i>
+      </div>
+    </ng-template>
+    <ng-template #subtitle>
+      <div class="text-xl text-center text-color pb-2">Verify Your Email</div>
+    </ng-template>
+    <ng-template #content>
+      <div class="text-base text-color-secondary text-center">
+        Please verify your email before continue the CyberHeroes admin panel.
+      </div>
+      <div class="pt-5 pb-1 text-center">
+        <button
+          pButton
+          size="small"
+          (click)="onSendVerificationEmail()"
+          [disabled]="isVerifyDisable"
+        >
+          Send verification email @if (countdown > 0) { ({{ countdown }}) }
+        </button>
+      </div>
+      <!-- <div class="text-xs text-color-secondary text-center">
+        Please refresh the page after verified.
+      </div> -->
+      <div class="flex justify-content-start mt-4 text-sm">
+        <p-button
+          label="Not ready yet? Try later."
+          [link]="true"
+          size="small"
+          (onClick)="onLogout()"
+          [disabled]="isVerifyDisable"
+        />
+      </div>
+    </ng-template>
+  </p-card>
+</div>
+
+<p-toast></p-toast>
