@@ -29,6 +29,7 @@ export class AdminManagementComponent implements OnInit {
   isAdminListLoading: boolean = false;
   createAdminForm!: FormGroup;
   admins: Admin[] = [];
+  hasAction: boolean = false;
 
   constructor(public userService: UserService, private router: Router, private fb: FormBuilder, private auth: Auth, private messageService: MessageService) {}
 
@@ -87,10 +88,12 @@ export class AdminManagementComponent implements OnInit {
   }
 
   async onDeleteAdmin(targetUid: string) {
+    this.hasAction = true;
     this.userService.deleteAdmin(targetUid).pipe(
       switchMap(() => this.loadAdminList()),
       tap(() => {
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Admin is deleted!', life: 3000 });
+        this.hasAction = false;
       }),
       catchError((err) => {
         if (err instanceof Error) {
@@ -98,6 +101,7 @@ export class AdminManagementComponent implements OnInit {
         } else {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
         }
+        this.hasAction = false;
         return of(null);
       })
     ).subscribe();

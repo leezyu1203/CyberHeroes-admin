@@ -26,6 +26,7 @@ export class FilterForceComponent implements OnInit {
   isFormLoading: boolean = false;
   createMessageForm!: FormGroup;
   messages: Message[] = [] ;
+  hasAction: boolean = false;
 
   constructor(private fb: FormBuilder, private ffService: FilterForceService, private messageService: MessageService) {}
 
@@ -98,15 +99,18 @@ export class FilterForceComponent implements OnInit {
   }
 
   async onDeleteMessage(id: string) {
+    this.hasAction = true;
     try {
       await this.ffService.deleteMessage(id);
       this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Message is deleted!', life: 3000 });
+      this.hasAction = false;
     } catch (err) {
       if (err instanceof Error) {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
       } else {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
       }
+      this.hasAction = false;
     }
   }
 

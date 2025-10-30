@@ -33,6 +33,7 @@ export class QuizQuestionsComponent implements OnInit {
   quizLevel?: QuizLevel;
   questions: (QuizQuestion & { isEditing: boolean })[] = [];
   questionNumField: number = 0;
+  hasAction: boolean = false;
 
   createQuestionForm!: FormGroup;
 
@@ -210,20 +211,23 @@ export class QuizQuestionsComponent implements OnInit {
   }
 
   async onDeleteQuestion(id: string | undefined) {
-    console.log(id);
+    // console.log(id);
     const levelId = this.quizLevel?.id
     if (!id || !levelId) {
       return;
     }
+    this.hasAction = true;
     try {
       await this.quizService.deleteQuizQuestion(levelId, id);
       this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Question is deleted!', life: 3000 });
+      this.hasAction = false;
     } catch (err) {
       if (err instanceof Error) {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
       } else {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
       }
+      this.hasAction = false;
     }
   }
 

@@ -29,6 +29,7 @@ export class PhishOrFakeComponent implements OnInit {
   createEmailForm!: FormGroup;
   emails: Email[] = [];
   viewingEmail?: Email;
+  hasAction: boolean = false;
 
   constructor(private fb: FormBuilder, private pofService: PhishOrFakeService, private messageService: MessageService) {}
   
@@ -106,15 +107,18 @@ export class PhishOrFakeComponent implements OnInit {
   }
 
   async onDeleteEmail(id: string) {
+    this.hasAction = true;
     try {
       await this.pofService.deleteEmail(id);
       this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email is deleted!', life: 3000 });
+      this.hasAction = false;
     } catch (err) {
       if (err instanceof Error) {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
       } else {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
       }
+      this.hasAction = false;
     }
   }
 
