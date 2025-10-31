@@ -62,6 +62,10 @@ export class LoginComponent {
     }
   }
 
+  onForgotPassword() {
+    this.router.navigate(['/forgot-password']);
+  }
+
   isFieldInvalid(controlName: string): boolean {
     const control = this.loginForm.get(controlName);
     return !!(control && control.touched && control.invalid)

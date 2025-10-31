@@ -11,11 +11,13 @@ import { QuizComponent } from './pages/quiz/quiz.component';
 import { QuizQuestionsComponent } from './pages/quiz/quiz-questions/quiz-questions.component';
 import { FirstTimeLoginComponent } from './pages/first-time-login/first-time-login.component';
 import { VerifyEmailComponent } from './pages/verify-email/verify-email.component';
+import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent, canActivate: [noAuthGuard] },
     { path: 'first-time-login', component: FirstTimeLoginComponent, canActivate: [firstTimeLoginGuard] },
     { path: 'verify-email', component: VerifyEmailComponent, canActivate: [verificationGuard] },
+    { path: 'forgot-password', component: ForgotPasswordComponent, canActivate: [noAuthGuard] },
     { 
         path: '', 
         component: LayoutComponent, 

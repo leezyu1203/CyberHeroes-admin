@@ -8,11 +8,12 @@
  */
 
 import {setGlobalOptions} from "firebase-functions";
-import {onCall} from "firebase-functions/v2/https";
+import {HttpsError, onCall} from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 import {getFirestore, Timestamp} from "firebase-admin/firestore";
 import {initializeApp} from "firebase-admin/app";
 import * as admin from "firebase-admin";
+import {getAuth} from "firebase-admin/auth";
 
 // Start writing functions
 // https://firebase.google.com/docs/functions/typescript
@@ -416,6 +417,32 @@ export const updatePassword = onCall(async (request) => {
     return {status: "ok", message: "Password updated successfully"};
   } catch (err) {
     throw new Error("Failed to update password.");
+  }
+});
+
+export const checkAdminEmailExists = onCall(async (request) => {
+  const {email} = request.data;
+
+  if (!email || typeof email !== "string") {
+    throw new HttpsError("invalid-argument", "Email address is required");
+  }
+
+  try {
+    await getAuth().getUserByEmail(email);
+    logger.info(`Successfully searched user with email address ${email}`);
+    return {
+      status: "ok", message: "The email address is existed", exists: true,
+    };
+  } catch (error: any) {
+    if (error.code === "auth/user-not-found") {
+      return {
+        status: "ok",
+        message: "The email address is not existed",
+        exists: false,
+      };
+    }
+    logger.error("Error checkAdminEmailExists: ", error);
+    throw new HttpsError("internal", "Failed to check user existence");
   }
 });
 

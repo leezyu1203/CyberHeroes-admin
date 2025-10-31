@@ -14,7 +14,17 @@
           {{ user.email || "" }}
         </div>
       </div>
-      <div>
+      <div class="flex flex-row gap-2">
+        <button
+          pButton
+          icon="pi pi-lock"
+          severity="secondary"
+          [raised]="true"
+          (click)="onResetPassword()"
+          [disabled]="isResetDisable"
+        >
+          Reset Password
+        </button>
         <button
           pButton
           icon="pi pi-sign-out"

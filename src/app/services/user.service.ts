@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
-import { Auth, onAuthStateChanged, sendEmailVerification, signOut, User, reload } from '@angular/fire/auth';
+import { Auth, onAuthStateChanged, sendEmailVerification, signOut, User, reload, sendPasswordResetEmail } from '@angular/fire/auth';
 import { Firestore, doc, docData} from '@angular/fire/firestore';
 import { Functions, httpsCallable } from '@angular/fire/functions';
-import { BehaviorSubject, from, map, Observable, switchMap, throwError } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, from, map, Observable, switchMap, throwError } from 'rxjs';
 
 export interface Admin {
   uid?: string;
@@ -56,6 +56,19 @@ export class UserService {
     await sendEmailVerification(user.firebaseUser);
   }
 
+  async sendResetPasswordEmail(email: string): Promise<void> {
+    try {
+      const res: any = await firstValueFrom(this.checkAdminEmailExists(email));
+      const is_existed = res.data.exists;
+      if (!is_existed) {
+        throw new Error('The email not found.');
+      }
+      await sendPasswordResetEmail(this.auth, email);
+    } catch (err: any) {
+      throw err;
+    }
+  }
+
   getAdminList(): Observable<Admin[]> {
     const readFn = httpsCallable(this.functions, 'getAdminList');
     return from(readFn()).pipe(
@@ -91,5 +104,10 @@ export class UserService {
         return from(updateFn({password}));
       })
     )
+  }
+
+  checkAdminEmailExists(email: string) {
+    const checkFn = httpsCallable(this.functions, 'checkAdminEmailExists');
+    return from(checkFn({ email }));
   }
 }
