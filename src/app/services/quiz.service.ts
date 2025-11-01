@@ -9,6 +9,7 @@ export interface QuizLevel {
   level_name: string;
   next_quiz_id?: string;
   question_num: number;
+  pass_score: number;
 }
 
 export interface QuizQuestion {

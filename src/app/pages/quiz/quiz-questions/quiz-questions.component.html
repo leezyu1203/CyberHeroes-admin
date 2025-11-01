@@ -6,17 +6,40 @@
     </h1>
     <p-button label="Create Question" icon="pi pi-plus" (onClick)="toggleCreateQuestionDialogVisibility()"></p-button>
   </div>
-  <div class="surface-100 border-round flex flex-column gap-2 p-4">
-    <div class="flex flex-row gap-2 align-items-center vertical-align-middle">
-        <span>Number of questions: </span>
-        @if (!isQuesNumEditing) {
-        <span>{{ quizLevel.question_num }}</span>
-        <p-button icon="pi pi-file-edit" [rounded]="true" [outlined]="true" size="small" (onClick)="toggleQuesNumEdit()"></p-button>
-        } @else {
-            <p-inputnumber inputId="integeronly" [(ngModel)]="questionNumField" [disabled]="isUpdateQuesNumLoading"></p-inputnumber>
-            <p-button label="Cancel" size="small" severity="secondary" (onClick)="toggleQuesNumEdit()" [disabled]="isUpdateQuesNumLoading"></p-button>
-            <p-button label="Update" size="small" (onClick)="onUpdateQuesNum()" [disabled]="questionNumField == quizLevel.question_num || !questionNumField || questionNumField <= 0" [loading]="isUpdateQuesNumLoading"></p-button>
-        }
+  <div class="surface-100 border-round flex flex-column gap-3 p-4">
+    <div class="flex flex-row justify-content-between">
+      <div class="flex flex-column gap-2">
+        <div class="flex flex-row gap-2 align-items-center vertical-align-middle">
+          <span>Number of questions: </span>
+          @if (!isQuesLevelEditing) {
+          <span>{{ quizLevel.question_num }}</span>
+          } @else {
+            <p-inputnumber inputId="integeronly" [(ngModel)]="questionNumField" [disabled]="isUpdateQuesLevelLoading"></p-inputnumber>
+          }
+        </div>
+        <div class="flex flex-row gap-2 align-items-center vertical-align-middle">
+          <span>Pass Score: </span>
+          @if (!isQuesLevelEditing) {
+          <span>{{ quizLevel.pass_score }}</span>
+          } @else {
+            <p-inputnumber inputId="integeronly" [(ngModel)]="passScoreField" [disabled]="isUpdateQuesLevelLoading"></p-inputnumber>
+          }
+        </div>
+      </div>
+      @if (!isQuesLevelEditing) {
+        <p-button icon="pi pi-file-edit" label="Edit" [raised]="true" [outlined]="true" size="small" (onClick)="toggleQuesLevelEdit()"></p-button>
+      } @else {
+        <div class="flex flex-row gap-2">
+          <p-button label="Cancel" size="small" severity="secondary" (onClick)="toggleQuesLevelEdit()" [disabled]="isUpdateQuesLevelLoading"></p-button>
+          <p-button 
+            label="Update" 
+            size="small" 
+            (onClick)="onUpdateQuesLevel()" 
+            [disabled]="!questionNumField || questionNumField <= 0 || !passScoreField || passScoreField <= 0 || (questionNumField == quizLevel.question_num && passScoreField == quizLevel.pass_score)" 
+            [loading]="isUpdateQuesLevelLoading">
+          </p-button>
+        </div>
+      }
     </div>
     <p-accordion value="0" (onOpen)="onAccordionOpen($event)">
       @for (ques of questions; track ques.id; let i = $index) {

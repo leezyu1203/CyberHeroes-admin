@@ -106,12 +106,18 @@ export const updateQuizLevel = onCall(async (request) => {
     }
   }
 
+  if ("pass_score" in payload) {
+    if (typeof payload.pass_score !== "number" || payload.pass_score <= 0) {
+      throw new Error("Invalid value: pass_score must be > 0");
+    }
+  }
+
   try {
     const levelRef = db.collection(levelsCollection).doc(docId);
     await levelRef.update({
       ...payload,
-      updatedAt: Timestamp.now(),
-      updatedBy: uid,
+      updated_at: Timestamp.now(),
+      updated_by: uid,
     });
     logger.info(`Quiz Level ${docId} updated by user ${uid}`);
   } catch (err) {
