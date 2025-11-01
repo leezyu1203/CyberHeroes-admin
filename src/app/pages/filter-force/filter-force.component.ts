@@ -45,6 +45,9 @@ export class FilterForceComponent implements OnInit {
       error: err => {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
         this.isLoading = false;
+      },
+      complete: () => {
+        this.isLoading = false;
       }
     })
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { QuizLevel, QuizQuestion, QuizService } from '../../../services/quiz.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
@@ -37,7 +37,7 @@ export class QuizQuestionsComponent implements OnInit {
 
   createQuestionForm!: FormGroup;
 
-  constructor(private quizService: QuizService, private route: ActivatedRoute, private router: Router, private messageService: MessageService, private fb: FormBuilder) {}
+  constructor(private quizService: QuizService, private route: ActivatedRoute, private router: Router, private messageService: MessageService, private fb: FormBuilder, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     const levelId = this.route.snapshot.paramMap.get('id');
@@ -61,13 +61,17 @@ export class QuizQuestionsComponent implements OnInit {
           console.log("question: ", this.questions);
           this.questionNumField = this.quizLevel?.question_num || 0;
           this.isLoading = false;
+          this.cdr.detectChanges();
         },
         error: err => {
           this.onError(err.message);
           this.isLoading = false;
+          this.cdr.detectChanges();
         },
         complete: () => {
           if (!this.quizLevel) this.onError('Quiz level not found');
+          this.isLoading = false;
+          this.cdr.detectChanges();
         }
       });
     } else {
