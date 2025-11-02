@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { Dialog } from 'primeng/dialog'
@@ -28,7 +28,7 @@ export class FilterForceComponent implements OnInit {
   messages: Message[] = [] ;
   hasAction: boolean = false;
 
-  constructor(private fb: FormBuilder, private ffService: FilterForceService, private messageService: MessageService) {}
+  constructor(private fb: FormBuilder, private ffService: FilterForceService, private messageService: MessageService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.createMessageForm = this.fb.group({
@@ -41,13 +41,16 @@ export class FilterForceComponent implements OnInit {
         this.messages = msgs;
         console.log(this.messages);
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: err => {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       complete: () => {
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     })
   }

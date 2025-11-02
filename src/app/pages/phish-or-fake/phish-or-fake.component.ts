@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
@@ -31,7 +31,7 @@ export class PhishOrFakeComponent implements OnInit {
   viewingEmail?: Email;
   hasAction: boolean = false;
 
-  constructor(private fb: FormBuilder, private pofService: PhishOrFakeService, private messageService: MessageService) {}
+  constructor(private fb: FormBuilder, private pofService: PhishOrFakeService, private messageService: MessageService, private cdr: ChangeDetectorRef) {}
   
   ngOnInit() {
     this.createEmailForm = this.fb.group({
@@ -46,11 +46,14 @@ export class PhishOrFakeComponent implements OnInit {
         this.emails = res;
         console.log(this.emails);
         this.isLoading = false;
+        this.cdr.detectChanges();
       }, error: err => {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
         this.isLoading = false;
+        this.cdr.detectChanges();
       }, complete: () => {
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     })
   }
