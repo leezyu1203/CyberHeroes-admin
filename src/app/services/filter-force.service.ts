@@ -37,8 +37,8 @@ export class FilterForceService {
 
     return await addDoc(this.messagesRef, {
       ...payload,
-      createdAt: serverTimestamp(),
-      createdBy: user.uid,
+      created_at: serverTimestamp(),
+      created_by: user.uid,
     });
   }
 
@@ -51,8 +51,8 @@ export class FilterForceService {
     const messageRef = doc(this.firestore, this.messagesCollection, id);
     return await updateDoc(messageRef, {
       ...payload,
-      updatedAt: serverTimestamp(),
-      updatedBy: user.uid,
+      updated_at: serverTimestamp(),
+      updated_by: user.uid,
     });
   }
 

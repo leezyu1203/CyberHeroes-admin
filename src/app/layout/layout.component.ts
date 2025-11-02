@@ -26,6 +26,7 @@ export class LayoutComponent implements OnInit {
       { label: 'Password Rush', icon: 'pi pi-lock', routerLink: '/password-rush' },
       { label: 'Phish Or Fake', icon: 'pi pi-envelope', routerLink: '/phish-or-fake' },
       { label: 'Quiz', icon: 'pi pi-question', routerLink: '/quiz' },
+      { label: 'Revision Key Points', icon: 'pi pi-key', routerLink: '/revision-key-points' },
       { separator: true },
     ]
 

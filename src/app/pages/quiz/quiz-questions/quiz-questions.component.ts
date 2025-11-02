@@ -265,7 +265,7 @@ export class QuizQuestionsComponent implements OnInit {
 
   answerForm(answer: string = '', isTrue: boolean = false): FormGroup {
     return this.fb.group({
-      answer: [answer , [Validators.required]],
+      answer: [answer, [Validators.required]],
       is_true: [isTrue],
     })
   }

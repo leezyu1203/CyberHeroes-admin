@@ -39,8 +39,8 @@ export class PhishOrFakeService {
 
     return await addDoc(this.emailsRef, {
       ...payload,
-      createdAt: serverTimestamp(),
-      createdBy: user.uid,
+      created_at: serverTimestamp(),
+      created_by: user.uid,
     });
   }
 
@@ -53,8 +53,8 @@ export class PhishOrFakeService {
     const messageRef = doc(this.firestore, this.emailsCollection, id);
     return await updateDoc(messageRef, {
       ...payload,
-      updatedAt: serverTimestamp(),
-      updatedBy: user.uid,
+      updated_at: serverTimestamp(),
+      updated_by: user.uid,
     })
   }
 

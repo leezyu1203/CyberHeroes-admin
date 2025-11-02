@@ -274,6 +274,32 @@ export const deleteQuizQuestion = onCall(async (request) => {
   return {status: "ok", message: "Question deleted successfully"};
 });
 
+export const deleteRevisionKeyPoint = onCall(async (request) => {
+  const revisionKeyPointsCollection = "revision_key_points";
+  const uid = request.auth?.uid;
+  if (!uid) {
+    throw new Error("Unauthorised: User must be logged in.");
+  }
+
+  const {docId} = request.data;
+  if (!docId) {
+    throw new Error("Missing docId");
+  }
+
+  const snapshot = await db.collection(revisionKeyPointsCollection).get();
+  const totalDocs = snapshot.size;
+  if (totalDocs <= 1) {
+    throw new Error(
+      "Cannot delete. At least 1 revision key point must remain."
+    );
+  }
+
+  await db.collection(revisionKeyPointsCollection).doc(docId).delete();
+  logger.info(`Revision key point ${docId} deleted by ${uid}`);
+
+  return {success: true, message: "Document deleted successfully"};
+});
+
 const adminCollection = "admins";
 
 /**

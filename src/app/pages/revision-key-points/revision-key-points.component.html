@@ -1,0 +1,158 @@
+<div class="flex flex-column gap-3">
+  <div class="flex flex-row justify-content-between align-items-end">
+    <h1 class="page-h1">Revision Key Points</h1>
+    <button
+      pButton
+      icon="pi pi-plus"
+      (click)="toggleCreateKeyPointsDialogVisibility()"
+      [disabled]="hasAction"
+    >
+      Create Key Point
+    </button>
+  </div>
+  <div
+    class="surface-100 border-round flex flex-column gap-3 p-4"
+    *ngIf="!isLoading; else loading"
+  >
+    @if (keyPoints.length <= 0) { No revision key points yet. } @else {
+    <p-accordion value="0">
+      @for (keyPoint of keyPoints; track keyPoint.id; let i = $index) {
+      <p-accordion-panel [value]="i">
+        <p-accordion-header>{{ keyPoint.topic }}</p-accordion-header>
+        <p-accordion-content>
+          <div class="flex flex-column px-3">
+            @if (!keyPoint.tips || keyPoint.tips.length <= 0) { No tips
+            available } @else { @for (tip of keyPoint.tips; track $index; let i
+            = $index) {
+            <div class="pb-1">
+              <li>{{ tip }}</li>
+            </div>
+            } }
+            <div class="flex flex-row justify-content-end gap-2">
+              <p-button
+                icon="pi pi-file-edit"
+                label="Edit"
+                [raised]="true"
+                [outlined]="true"
+                size="small"
+                [disabled]="hasAction"
+                (onClick)="onEditState(i)"
+              ></p-button>
+              <p-button
+                icon="pi pi-trash"
+                [raised]="true"
+                [rounded]="true"
+                [outlined]="true"
+                severity="danger"
+                size="small"
+                [disabled]="keyPoints.length <= 1 || hasAction"
+                (onClick)="onDeleteKeyPoints(i)"
+              ></p-button>
+            </div>
+          </div>
+        </p-accordion-content>
+      </p-accordion-panel>
+      }
+    </p-accordion>
+    }
+  </div>
+  <ng-template #loading>
+    <p-skeleton width="100%" height="4rem" />
+  </ng-template>
+</div>
+
+<p-dialog
+  [header]="!isKeyPointEditing ? 'Create New Key Point' : 'Edit Key Point'"
+  [modal]="true"
+  [(visible)]="visible"
+  [style]="{ width: '50%' }"
+  (onHide)="resetCreateKeyPointsForm()"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+>
+  <form [formGroup]="createKeyPointForm" (ngSubmit)="onCreateKeyPoints()">
+    <div class="flex flex-column align-item-start gap-1 mb-4">
+      <label for="topic" class="font-semibold">Topic</label>
+      <input
+        pInputText
+        id="topic"
+        formControlName="topic"
+        class="w-full"
+        placeholder="Topic"
+      />
+      @if (isFieldInvalid('topic')) {
+      <span
+        class="text-red-500 text-xs"
+        *ngIf="createKeyPointForm.get('topic')?.errors?.['required']"
+        >Topic is required</span
+      >
+      }
+    </div>
+    <div class="flex flex-column align-item-start gap-1 mb-4">
+      <div
+        class="flex flex-row justify-content-between align-items-center vertical-align-middle w-full"
+      >
+        <label class="font-semibold">Tips</label>
+        <p-button
+          label="More Tip"
+          icon="pi pi-plus"
+          size="small"
+          [disabled]="isFormLoading"
+          (onClick)="tips.push(tipForm())"
+        ></p-button>
+      </div>
+      <div formArrayName="tips" class="flex flex-column gap-2 w-full">
+        <div
+          *ngFor="let tip of tips.controls; let i = index"
+          [formGroupName]="i"
+          class="flex flex-column gap-1"
+        >
+          <div class="flex flex-row gap-2">
+            <p-button
+              icon="pi pi-trash"
+              [rounded]="true"
+              [outlined]="true"
+              severity="danger"
+              (onClick)="onRemoveTipForm(i)"
+              [disabled]="tips.length <= 1"
+            ></p-button>
+            <input
+              pInputText
+              [id]="i"
+              formControlName="tip"
+              placeholder="Tip"
+              class="w-full"
+            />
+          </div>
+          @if (tips.controls[i].get('tip')?.touched &&
+          tips.controls[i].get('tip')?.errors?.['required']) {
+          <span class="text-red-500 text-xs">Tip is required</span>
+          }
+        </div>
+      </div>
+    </div>
+    <div class="flex justify-content-end gap-2">
+      <p-button
+        label="Cancel"
+        severity="secondary"
+        (click)="toggleCreateKeyPointsDialogVisibility()"
+        [disabled]="isFormLoading"
+      />
+      <p-button
+        label="Create"
+        type="submit"
+        *ngIf="!isKeyPointEditing; else update"
+        [loading]="isFormLoading"
+      />
+      <ng-template #update>
+        <p-button
+          label="Update"
+          (onClick)="onUpdateKeyPoint()"
+          [disabled]="createKeyPointForm.pristine || createKeyPointForm.invalid"
+          [loading]="isFormLoading"
+        />
+      </ng-template>
+    </div>
+  </form>
+</p-dialog>
+
+<p-toast></p-toast>

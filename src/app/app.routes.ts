@@ -12,6 +12,7 @@ import { QuizQuestionsComponent } from './pages/quiz/quiz-questions/quiz-questio
 import { FirstTimeLoginComponent } from './pages/first-time-login/first-time-login.component';
 import { VerifyEmailComponent } from './pages/verify-email/verify-email.component';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
+import { RevisionKeyPointsComponent } from './pages/revision-key-points/revision-key-points.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent, canActivate: [noAuthGuard] },
@@ -30,6 +31,7 @@ export const routes: Routes = [
             { path: 'quiz', component: QuizComponent },
             { path: 'quiz/:id', component: QuizQuestionsComponent }, 
             { path: 'admin-management', component: AdminManagementComponent },
+            { path: 'revision-key-points', component: RevisionKeyPointsComponent },
         ],
     },
     { path: '**', redirectTo: '/', pathMatch: 'full' },
