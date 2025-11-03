@@ -12,7 +12,12 @@ export const authGuard: CanActivateFn = async() => {
   );
 
   const token = await auth.currentUser?.getIdTokenResult();
+  const is_verified = await auth.currentUser?.emailVerified;
   if (user) {
+    if (!is_verified) {
+      router.navigate(['/verify-email']);
+      return false;
+    }
     if (!!token?.claims['is_first_login']) {
       router.navigate(['/first-time-login']);
       return false;
@@ -47,6 +52,19 @@ export const firstTimeLoginGuard: CanActivateFn = async() => {
   const token = await auth.currentUser?.getIdTokenResult();
   // console.log(token?.claims['is_first_login']);
   if (!!token?.claims['is_first_login']) {
+    return true;
+  } else {
+    router.navigate(['/']);
+    return false;
+  }
+}
+
+export const verificationGuard: CanActivateFn = async() => {
+  const auth = inject(Auth);
+  const router = inject(Router);
+
+  const is_verified = await auth.currentUser?.emailVerified;
+  if (!is_verified) {
     return true;
   } else {
     router.navigate(['/']);

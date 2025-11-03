@@ -8,11 +8,12 @@
  */
 
 import {setGlobalOptions} from "firebase-functions";
-import {onCall} from "firebase-functions/v2/https";
+import {HttpsError, onCall} from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 import {getFirestore, Timestamp} from "firebase-admin/firestore";
 import {initializeApp} from "firebase-admin/app";
 import * as admin from "firebase-admin";
+import {getAuth} from "firebase-admin/auth";
 
 // Start writing functions
 // https://firebase.google.com/docs/functions/typescript
@@ -105,12 +106,18 @@ export const updateQuizLevel = onCall(async (request) => {
     }
   }
 
+  if ("pass_score" in payload) {
+    if (typeof payload.pass_score !== "number" || payload.pass_score <= 0) {
+      throw new Error("Invalid value: pass_score must be > 0");
+    }
+  }
+
   try {
     const levelRef = db.collection(levelsCollection).doc(docId);
     await levelRef.update({
       ...payload,
-      updatedAt: Timestamp.now(),
-      updatedBy: uid,
+      updated_at: Timestamp.now(),
+      updated_by: uid,
     });
     logger.info(`Quiz Level ${docId} updated by user ${uid}`);
   } catch (err) {
@@ -267,6 +274,32 @@ export const deleteQuizQuestion = onCall(async (request) => {
   return {status: "ok", message: "Question deleted successfully"};
 });
 
+export const deleteRevisionKeyPoint = onCall(async (request) => {
+  const revisionKeyPointsCollection = "revision_key_points";
+  const uid = request.auth?.uid;
+  if (!uid) {
+    throw new Error("Unauthorised: User must be logged in.");
+  }
+
+  const {docId} = request.data;
+  if (!docId) {
+    throw new Error("Missing docId");
+  }
+
+  const snapshot = await db.collection(revisionKeyPointsCollection).get();
+  const totalDocs = snapshot.size;
+  if (totalDocs <= 1) {
+    throw new Error(
+      "Cannot delete. At least 1 revision key point must remain."
+    );
+  }
+
+  await db.collection(revisionKeyPointsCollection).doc(docId).delete();
+  logger.info(`Revision key point ${docId} deleted by ${uid}`);
+
+  return {success: true, message: "Document deleted successfully"};
+});
+
 const adminCollection = "admins";
 
 /**
@@ -416,6 +449,32 @@ export const updatePassword = onCall(async (request) => {
     return {status: "ok", message: "Password updated successfully"};
   } catch (err) {
     throw new Error("Failed to update password.");
+  }
+});
+
+export const checkAdminEmailExists = onCall(async (request) => {
+  const {email} = request.data;
+
+  if (!email || typeof email !== "string") {
+    throw new HttpsError("invalid-argument", "Email address is required");
+  }
+
+  try {
+    await getAuth().getUserByEmail(email);
+    logger.info(`Successfully searched user with email address ${email}`);
+    return {
+      status: "ok", message: "The email address is existed", exists: true,
+    };
+  } catch (error: any) {
+    if (error.code === "auth/user-not-found") {
+      return {
+        status: "ok",
+        message: "The email address is not existed",
+        exists: false,
+      };
+    }
+    logger.error("Error checkAdminEmailExists: ", error);
+    throw new HttpsError("internal", "Failed to check user existence");
   }
 });
 

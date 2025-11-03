@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { QuizLevel, QuizService } from '../../services/quiz.service';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -18,7 +18,7 @@ export class QuizComponent implements OnInit {
   isLoading: boolean = true;
   quizLevels: QuizLevel[] = [];
 
-  constructor(private quizService: QuizService, private messageService: MessageService) {}
+  constructor(private quizService: QuizService, private messageService: MessageService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.quizService.getQuizLevels().subscribe({
@@ -26,11 +26,17 @@ export class QuizComponent implements OnInit {
         this.quizLevels = res;
         console.log(this.quizLevels);
         this.isLoading = false;
+        this.cdr.detectChanges();
       }, 
       error: err => {
         console.error(err);
         this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
         this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      complete: () => {
+        this.isLoading = false;
+        this.cdr.detectChanges();
       }
     })
   }

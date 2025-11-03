@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -24,7 +24,7 @@ export class PasswordRushComponent implements OnInit {
   // createRuleForm!: FormGroup;
   rules: Rule[] = [];
 
-  constructor(private fb: FormBuilder, private prService: PasswordRushService, private messageService: MessageService) {}
+  constructor(private fb: FormBuilder, private prService: PasswordRushService, private messageService: MessageService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     // this.createRuleForm = this.fb.group({
@@ -36,9 +36,14 @@ export class PasswordRushComponent implements OnInit {
         this.rules = res;
         console.log(this.rules);
         this.isLoading = false;
+        this.cdr.detectChanges();
       }, error: err => {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
         this.isLoading = false;
+        this.cdr.detectChanges();
+      }, complete: () => {
+        this.isLoading = false;
+        this.cdr.detectChanges();
       }
     })
   }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
@@ -29,8 +29,9 @@ export class PhishOrFakeComponent implements OnInit {
   createEmailForm!: FormGroup;
   emails: Email[] = [];
   viewingEmail?: Email;
+  hasAction: boolean = false;
 
-  constructor(private fb: FormBuilder, private pofService: PhishOrFakeService, private messageService: MessageService) {}
+  constructor(private fb: FormBuilder, private pofService: PhishOrFakeService, private messageService: MessageService, private cdr: ChangeDetectorRef) {}
   
   ngOnInit() {
     this.createEmailForm = this.fb.group({
@@ -45,9 +46,14 @@ export class PhishOrFakeComponent implements OnInit {
         this.emails = res;
         console.log(this.emails);
         this.isLoading = false;
+        this.cdr.detectChanges();
       }, error: err => {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
         this.isLoading = false;
+        this.cdr.detectChanges();
+      }, complete: () => {
+        this.isLoading = false;
+        this.cdr.detectChanges();
       }
     })
   }
@@ -106,15 +112,18 @@ export class PhishOrFakeComponent implements OnInit {
   }
 
   async onDeleteEmail(id: string) {
+    this.hasAction = true;
     try {
       await this.pofService.deleteEmail(id);
       this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email is deleted!', life: 3000 });
+      this.hasAction = false;
     } catch (err) {
       if (err instanceof Error) {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
       } else {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
       }
+      this.hasAction = false;
     }
   }
 

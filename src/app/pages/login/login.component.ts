@@ -8,18 +8,25 @@ import { Auth, signInWithEmailAndPassword } from '@angular/fire/auth';
 import { CommonModule } from "@angular/common";
 import { Router } from '@angular/router';
 import { UserService } from '../../services/user.service';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { DialogModule } from 'primeng/dialog';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-login',
-  imports: [CardModule, InputTextModule, FloatLabelModule, ReactiveFormsModule, ButtonModule, CommonModule],
+  imports: [CardModule, InputTextModule, FloatLabelModule, ReactiveFormsModule, ButtonModule, CommonModule, ToastModule, DialogModule],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  styleUrl: './login.component.scss',
+  providers: [MessageService]
 })
 export class LoginComponent {
   loginForm!: FormGroup
-  isLoading: boolean = false;
+  isLoading = false;
+  dialogVisible: boolean = true;
+  verificationDisable: boolean = false;
 
-  constructor(private fb: FormBuilder, private auth: Auth, private router: Router, private userService: UserService) {}
+  constructor(private fb: FormBuilder, private auth: Auth, private router: Router, private userService: UserService, private messageService: MessageService) { }
 
   ngOnInit() {
     this.loginForm = this.fb.group({
@@ -35,6 +42,7 @@ export class LoginComponent {
       return;
     }
     this.isLoading = true;
+    this.loginForm.disable();
     const { email, password } = this.loginForm.value;
     try {
       await signInWithEmailAndPassword(this.auth, email, password);
@@ -42,15 +50,20 @@ export class LoginComponent {
       if (user) {
         await this.userService.setCustomClaims();
         await user.getIdToken(true);
-        this.router.navigate(['/first-time-login']);
+        this.router.navigate(['/verify-email']);
         // console.log((await user.getIdTokenResult()).claims['is_first_login']);
       }
       // alert('Login successfull!');
     } catch (err: any) {
-      alert("Something sent wrong.\n" + err.message);
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
     } finally {
-      this.isLoading = false;
+      this.loginForm.enable()
+      this.isLoading = false
     }
+  }
+
+  onForgotPassword() {
+    this.router.navigate(['/forgot-password']);
   }
 
   isFieldInvalid(controlName: string): boolean {

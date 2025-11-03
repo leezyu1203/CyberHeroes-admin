@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { QuizLevel, QuizQuestion, QuizService } from '../../../services/quiz.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
@@ -26,17 +26,19 @@ import { ToggleSwitchChangeEvent, ToggleSwitchModule } from 'primeng/toggleswitc
 export class QuizQuestionsComponent implements OnInit {
   visible: boolean = false;
   isLoading: boolean = true;
-  isQuesNumEditing: boolean = false;
+  isQuesLevelEditing: boolean = false;
   isQuesEditing: boolean = false;
-  isUpdateQuesNumLoading: boolean = false;
+  isUpdateQuesLevelLoading: boolean = false;
   isFormLoading: boolean = false;
   quizLevel?: QuizLevel;
   questions: (QuizQuestion & { isEditing: boolean })[] = [];
   questionNumField: number = 0;
+  passScoreField: number = 0;
+  hasAction: boolean = false;
 
   createQuestionForm!: FormGroup;
 
-  constructor(private quizService: QuizService, private route: ActivatedRoute, private router: Router, private messageService: MessageService, private fb: FormBuilder) {}
+  constructor(private quizService: QuizService, private route: ActivatedRoute, private router: Router, private messageService: MessageService, private fb: FormBuilder, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     const levelId = this.route.snapshot.paramMap.get('id');
@@ -59,14 +61,19 @@ export class QuizQuestionsComponent implements OnInit {
           console.log("level: ", this.quizLevel);
           console.log("question: ", this.questions);
           this.questionNumField = this.quizLevel?.question_num || 0;
+          this.passScoreField = this.quizLevel?.pass_score || 0;
           this.isLoading = false;
+          this.cdr.detectChanges();
         },
         error: err => {
           this.onError(err.message);
           this.isLoading = false;
+          this.cdr.detectChanges();
         },
         complete: () => {
           if (!this.quizLevel) this.onError('Quiz level not found');
+          this.isLoading = false;
+          this.cdr.detectChanges();
         }
       });
     } else {
@@ -91,7 +98,7 @@ export class QuizQuestionsComponent implements OnInit {
   }
 
   onAccordionOpen(event: AccordionTabOpenEvent) {
-    console.log(event.index);
+    // console.log(event.index);
     const question: QuizQuestion = this.questions[event.index];
     const levelId = this.quizLevel?.id;
     if (!levelId || !question.id) {
@@ -102,6 +109,7 @@ export class QuizQuestionsComponent implements OnInit {
       this.quizService.getQuesAnswers(levelId, question.id).subscribe({
         next: res => {
           question.answers = res;
+          this.cdr.detectChanges();
         }, error: err => {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
         }
@@ -179,24 +187,28 @@ export class QuizQuestionsComponent implements OnInit {
     }
   }
 
-  async onUpdateQuesNum(){
-    if (!this.questionNumField || this.questionNumField <= 0 || this.questionNumField == this.quizLevel?.question_num) {
+  async onUpdateQuesLevel(){
+    if (!this.questionNumField || this.questionNumField <= 0 || !this.passScoreField || this.passScoreField <= 0 
+      || (this.questionNumField == this.quizLevel?.question_num && this.passScoreField == this.quizLevel?.pass_score)
+    ) {
       return;
     }
     if (this.questionNumField > this.questions.length) {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Cannot update value that exceed the total number of questions in the question bank'});
       return;
     }
-    this.isUpdateQuesNumLoading = true;
+    this.isUpdateQuesLevelLoading = true;
     const payload: Partial<QuizLevel> = {
       question_num: this.questionNumField,
+      pass_score: this.passScoreField,
     }
     if (this.quizLevel?.id) {
       try {
         this.quizService.updateQuizLevel(this.quizLevel?.id, payload);
-        this.toggleQuesNumEdit();
+        this.toggleQuesLevelEdit();
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Quiz question number is updated!', life: 3000 });
         this.quizLevel.question_num = this.questionNumField;
+        this.quizLevel.pass_score = this.passScoreField;
       } catch (err) {
         if (err instanceof Error) {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
@@ -204,26 +216,29 @@ export class QuizQuestionsComponent implements OnInit {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
         }
       } finally {
-        this.isUpdateQuesNumLoading = false;
+        this.isUpdateQuesLevelLoading = false;
       }
     }
   }
 
   async onDeleteQuestion(id: string | undefined) {
-    console.log(id);
+    // console.log(id);
     const levelId = this.quizLevel?.id
     if (!id || !levelId) {
       return;
     }
+    this.hasAction = true;
     try {
       await this.quizService.deleteQuizQuestion(levelId, id);
       this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Question is deleted!', life: 3000 });
+      this.hasAction = false;
     } catch (err) {
       if (err instanceof Error) {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });
       } else {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
       }
+      this.hasAction = false;
     }
   }
 
@@ -250,7 +265,7 @@ export class QuizQuestionsComponent implements OnInit {
 
   answerForm(answer: string = '', isTrue: boolean = false): FormGroup {
     return this.fb.group({
-      answer: [answer , [Validators.required]],
+      answer: [answer, [Validators.required]],
       is_true: [isTrue],
     })
   }
@@ -269,11 +284,12 @@ export class QuizQuestionsComponent implements OnInit {
     this.isFormLoading = false;
   }
 
-  toggleQuesNumEdit() {
-    if (!this.isQuesNumEditing) {
+  toggleQuesLevelEdit() {
+    if (!this.isQuesLevelEditing) {
       this.questionNumField = this.quizLevel?.question_num || 0;
+      this.passScoreField = this.quizLevel?.pass_score || 0;
     }
-    this.isQuesNumEditing = !this.isQuesNumEditing;
+    this.isQuesLevelEditing = !this.isQuesLevelEditing;
   }
 
   resetCreateQuestionForm() {
