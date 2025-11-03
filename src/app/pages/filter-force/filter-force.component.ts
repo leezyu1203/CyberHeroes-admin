@@ -61,6 +61,7 @@ export class FilterForceComponent implements OnInit {
       return;
     }
     this.isFormLoading = true;
+    this.createMessageForm.disable();
     const payload: Message = {
       message: this.createMessageForm.get('message')?.value,
       is_danger: this.createMessageForm.get('isDanger')?.value,
@@ -76,6 +77,7 @@ export class FilterForceComponent implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
       }
       this.isFormLoading = false;
+      this.createMessageForm.enable();
     }
   }
 
@@ -85,6 +87,7 @@ export class FilterForceComponent implements OnInit {
       return;
     }
     this.isFormLoading = true;
+    this.createMessageForm.disable();
     const payload: Message = {
       message: this.createMessageForm.get('message')?.value,
       is_danger: this.createMessageForm.get('isDanger')?.value,
@@ -101,6 +104,7 @@ export class FilterForceComponent implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
       }
       this.isFormLoading = false;
+      this.createMessageForm.enable();
     }
   }
 
@@ -138,6 +142,7 @@ export class FilterForceComponent implements OnInit {
     }
     this.visible = !this.visible;
     this.isFormLoading = false;
+    this.createMessageForm.enable();
   }
 
   resetCreateMessageForm() {

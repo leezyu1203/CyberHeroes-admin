@@ -64,6 +64,7 @@ export class PhishOrFakeComponent implements OnInit {
       return
     }
     this.isFormLoading = true;
+    this.createEmailForm.disable();
     const payload: Email = {
       subject: this.createEmailForm.get('subject')?.value,
       sender: this.createEmailForm.get('senderEmail')?.value,
@@ -81,6 +82,7 @@ export class PhishOrFakeComponent implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
       }
       this.isFormLoading = false;
+      this.createEmailForm.enable();
     }
   }
 
@@ -90,6 +92,7 @@ export class PhishOrFakeComponent implements OnInit {
       return;
     }
     this.isFormLoading = true;
+    this.createEmailForm.disable();
     const payload: Email = {
       subject: this.createEmailForm.get('subject')?.value,
       sender: this.createEmailForm.get('senderEmail')?.value,
@@ -108,6 +111,7 @@ export class PhishOrFakeComponent implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
       }
       this.isFormLoading = false;
+      this.createEmailForm.enable();
     }
   }
 
@@ -152,6 +156,7 @@ export class PhishOrFakeComponent implements OnInit {
     }
     this.visible = !this.visible;
     this.isFormLoading = false;
+    this.createEmailForm.enable();
   }
 
   resetCreateEmailForm() {
