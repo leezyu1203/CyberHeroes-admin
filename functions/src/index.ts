@@ -153,16 +153,16 @@ export const createQuizQuestion = onCall(async (request) => {
     batch.set(questionRef, {
       question: payload.question,
       explanation: payload.explanation,
-      createdBy: uid,
-      createdAt: now,
+      created_by: uid,
+      created_at: now,
     });
     for (const a of payload.answers) {
       const ansRef = questionRef.collection(answersCollection).doc();
       batch.set(ansRef, {
         answer: a.answer,
         is_true: a.is_true,
-        createdBy: uid,
-        createdAt: now,
+        created_by: uid,
+        created_at: now,
       });
     }
 
@@ -211,8 +211,8 @@ export const updateQuizQuestion = onCall(async (request) => {
     batch.update(questionRef, {
       question: payload.question,
       explanation: payload.explanation,
-      updatedBy: uid,
-      updatedAt: now,
+      updated_by: uid,
+      updated_at: now,
     });
     const answerSnap = await questionRef.collection(answersCollection).get();
     answerSnap.forEach((doc) => {
@@ -223,8 +223,8 @@ export const updateQuizQuestion = onCall(async (request) => {
       batch.set(ansRef, {
         answer: a.answer,
         is_true: a.is_true,
-        updatedBy: uid,
-        updatedAt: now,
+        updated_by: uid,
+        updated_at: now,
       });
     }
 
