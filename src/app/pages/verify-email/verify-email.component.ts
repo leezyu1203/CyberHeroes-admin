@@ -49,7 +49,7 @@ export class VerifyEmailComponent implements OnInit, OnDestroy {
       await this.userService.sendEmailVerification();
       const nextAvailableTime = Date.now() + 60 * 1000;
       localStorage.setItem(this.emailCooldown, nextAvailableTime.toString());
-      // this.startCountdown();
+      this.startCountdown();
       this.router.navigate(['/first-time-login'])
     } catch (error: any) {
       this.isVerifyDisable = false

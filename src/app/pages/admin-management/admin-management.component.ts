@@ -41,7 +41,7 @@ export class AdminManagementComponent implements OnInit, OnDestroy {
     this.createAdminForm = this.fb.group({
       username: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required]],
+      password: ['defau1t_@dmin', [Validators.required]],
       isSuperadmin: [false],
     });
 
@@ -93,6 +93,7 @@ export class AdminManagementComponent implements OnInit, OnDestroy {
       return;
     }
     this.isFormLoading = true;
+    this.createAdminForm.disable();
     const payload: Admin = {
       username: this.createAdminForm.get('username')?.value,
       email: this.createAdminForm.get('email')?.value,
@@ -109,6 +110,7 @@ export class AdminManagementComponent implements OnInit, OnDestroy {
         this.toggleCreateAdminDialogVisibility();
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'New admin created!', life: 3000 });
         this.isFormLoading = false;
+        this.createAdminForm.enable();
       }), 
       catchError((err) => {
         if (err instanceof Error) {
@@ -117,6 +119,7 @@ export class AdminManagementComponent implements OnInit, OnDestroy {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
         }
         this.isFormLoading = false;
+        this.createAdminForm.enable();
         return of(null);
       })
     ).subscribe();
