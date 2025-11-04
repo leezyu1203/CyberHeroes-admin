@@ -389,6 +389,7 @@ export const createAdmin = onCall(async (request) => {
       created_at: Timestamp.now(),
     });
     await db.collection(usersCollection).doc(newUser.uid).set({
+      uid: newUser.uid,
       username: payload.username,
       email: payload.email,
       register_date: Timestamp.now(),
