@@ -432,6 +432,23 @@ export const deleteAdmin = onCall(async (request) => {
     await db.collection(adminCollection).doc(targetUid).delete();
     await db.collection(usersCollection).doc(targetUid).delete();
     await admin.auth().deleteUser(targetUid);
+
+    const friendsRef = db.collection("friends");
+    const query1 = friendsRef.where("user_1", "==", targetUid);
+    const query2 = friendsRef.where("user_2", "==", targetUid);
+    const [snap1, snap2] = await Promise.all([query1.get(), query2.get()]);
+    const friendDocs = [...snap1.docs, ...snap2.docs];
+    for (const doc of friendDocs) {
+      await doc.ref.delete();
+    }
+
+    const quizAttemptsRef = db.collection("quiz_attempts");
+    const attemptsSnap = await quizAttemptsRef.where("user_id", "==", targetUid)
+      .get();
+    for (const doc of attemptsSnap.docs) {
+      await doc.ref.delete();
+    }
+
     logger.info(`User admin ${targetUid} deleted by ${uid}`);
     return {
       status: "ok",
