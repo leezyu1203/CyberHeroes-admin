@@ -522,6 +522,32 @@ export const checkAdminEmailExists = onCall(async (request) => {
   }
 });
 
+export const checkEmailExists = onCall(async (request) => {
+  const {email} = request.data;
+
+  if (!email || typeof email !== "string") {
+    throw new HttpsError("invalid-argument", "Email address is required");
+  }
+
+  try {
+    await getAuth().getUserByEmail(email);
+    logger.info(`Successfully searched user with email address ${email}`);
+    return {
+      status: "ok", message: "The email address is existed", exists: true,
+    };
+  } catch (error: any) {
+    if (error.code === "auth/user-not-found") {
+      return {
+        status: "ok",
+        message: "The email address is not existed",
+        exists: false,
+      };
+    }
+    logger.error("Error checkEmailExists: ", error);
+    throw new HttpsError("internal", "Failed to check user existence");
+  }
+});
+
 // export const helloWorld = onRequest((request, response) => {
 //   logger.info("Hello logs!", {structuredData: true});
 //   response.send("Hello from Firebase!");
