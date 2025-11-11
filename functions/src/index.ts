@@ -153,6 +153,7 @@ export const createQuizQuestion = onCall(async (request) => {
     batch.set(questionRef, {
       question: payload.question,
       explanation: payload.explanation,
+      is_deleted: false,
       created_by: uid,
       created_at: now,
     });
@@ -260,7 +261,8 @@ export const deleteQuizQuestion = onCall(async (request) => {
   }
 
   const questionNum = levelSnap.get("question_num");
-  const questionsSnap = await levelRef.collection(questionsCollection).get();
+  const questionsSnap = await levelRef.collection(questionsCollection)
+    .where("is_deleted", "!=", true).get();
   const totalQuestions = questionsSnap.size;
   if (totalQuestions <= questionNum) {
     throw new Error(
@@ -268,7 +270,10 @@ export const deleteQuizQuestion = onCall(async (request) => {
     );
   }
 
-  await levelRef.collection(questionsCollection).doc(questionId).delete();
+  await levelRef.collection(questionsCollection).doc(questionId).update({
+    is_deleted: true,
+    deleted_at: Timestamp.now(),
+  });
   logger.info(`Level ${levelId}, Question ${questionId} deleted by ${uid}`);
 
   return {status: "ok", message: "Question deleted successfully"};

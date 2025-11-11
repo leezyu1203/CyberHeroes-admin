@@ -127,6 +127,7 @@ export class QuizQuestionsComponent implements OnInit {
       return;
     }
     this.isFormLoading = true;
+    this.createQuestionForm.disable();
     if (this.quizLevel?.id) {
       const levelId = this.quizLevel.id;
       const payload = {
@@ -146,6 +147,7 @@ export class QuizQuestionsComponent implements OnInit {
             this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
           }
           this.isFormLoading = false;
+          this.createQuestionForm.enable();
         }
       });
     }
@@ -161,6 +163,7 @@ export class QuizQuestionsComponent implements OnInit {
       return;
     }
     this.isFormLoading = true;
+    this.createQuestionForm.disable();
     if (this.quizLevel?.id && this.createQuestionForm.get('id')?.value) {
       const levelId = this.quizLevel.id;
       const questionId = this.createQuestionForm.get('id')?.value;
@@ -182,6 +185,7 @@ export class QuizQuestionsComponent implements OnInit {
             this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
           }
           this.isFormLoading = false;
+          this.createQuestionForm.enable();
         }
       });
     }
@@ -277,6 +281,7 @@ export class QuizQuestionsComponent implements OnInit {
   }
 
   toggleCreateQuestionDialogVisibility() {
+    this.createQuestionForm.enable();
     if (this.visible) {
       this.resetCreateQuestionForm();
     }
