@@ -49,3 +49,5 @@ Thumbs.db
 debug.log
 firebase-debug.log*
 firestore-debug.log*
+
+src/app/firebase.config.ts
