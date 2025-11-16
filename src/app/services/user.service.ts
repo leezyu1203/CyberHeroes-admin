@@ -3,6 +3,7 @@ import { Auth, onAuthStateChanged, sendEmailVerification, signOut, User, reload,
 import { Firestore, doc, docData} from '@angular/fire/firestore';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Router } from '@angular/router';
+import { browserLocalPersistence, setPersistence } from 'firebase/auth';
 import { BehaviorSubject, firstValueFrom, from, map, Observable, Subscription, switchMap, throwError } from 'rxjs';
 
 export interface Admin {
@@ -30,6 +31,14 @@ export class UserService {
   private profileSub?: Subscription;
 
   constructor() { 
+    setPersistence(this.auth, browserLocalPersistence)
+    .then(() => {
+      console.log('Firebase Auth persistence set to LOCAL');
+    })
+    .catch(err => {
+      console.error('Error setting persistence: ', err);
+    })
+
     onAuthStateChanged(this.auth, (user: User | null) => {
       if (this.profileSub) {
         this.profileSub.unsubscribe();
