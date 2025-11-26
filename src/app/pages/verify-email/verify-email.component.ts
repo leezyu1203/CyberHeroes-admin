@@ -6,6 +6,7 @@ import { UserService } from '../../services/user.service';
 import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { getAuth } from '@angular/fire/auth';
 
 @Component({
   selector: 'app-verify-email',
@@ -18,6 +19,7 @@ export class VerifyEmailComponent implements OnInit, OnDestroy {
   countdown = 0;
   isVerifyDisable: boolean = false
   private timerSub?: Subscription
+  private verifyInterval: any;
   emailCooldown: string = 'emailCooldown'
 
   constructor(private userService: UserService, private router: Router, private messageService: MessageService) {}
@@ -27,13 +29,17 @@ export class VerifyEmailComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-      if (this.timerSub) {
-        this.timerSub.unsubscribe();
-      }
+    if (this.timerSub) {
+      this.timerSub.unsubscribe();
+    }
+    if (this.verifyInterval) {
+      clearInterval(this.verifyInterval);
+    }
   }
 
   async onLogout() {
     await this.userService.logout();
+    clearInterval(this.verifyInterval)
     this.router.navigate(['/login']);
   }
 
@@ -50,7 +56,7 @@ export class VerifyEmailComponent implements OnInit, OnDestroy {
       const nextAvailableTime = Date.now() + 60 * 1000;
       localStorage.setItem(this.emailCooldown, nextAvailableTime.toString());
       this.startCountdown();
-      this.router.navigate(['/first-time-login'])
+      this.checkEmailVerified();
     } catch (error: any) {
       this.isVerifyDisable = false
       this.messageService.add({ severity: 'error', summary: 'Error', detail: error.message, life: 3000 });
@@ -85,4 +91,18 @@ export class VerifyEmailComponent implements OnInit, OnDestroy {
       }
     }
   }
+
+  checkEmailVerified() {
+    const auth = getAuth();
+
+    this.verifyInterval = setInterval(async () => {
+      await auth.currentUser?.reload();
+      if (auth.currentUser?.emailVerified) {
+        clearInterval(this.verifyInterval);
+        localStorage.removeItem(this.emailCooldown);
+        this.router.navigate(['/first-time-login']);
+      }
+    }, 3000); // check every 3 seconds
+  }
+
 }

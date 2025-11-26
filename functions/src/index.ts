@@ -411,7 +411,7 @@ export const createAdmin = onCall(async (request) => {
       });
     return {status: "ok", message: "Admin account created.", uid: uid};
   } catch (err) {
-    throw new Error("Failed to create admin");
+    throw new Error(`Failed to create admin ${err}`);
   }
 });
 

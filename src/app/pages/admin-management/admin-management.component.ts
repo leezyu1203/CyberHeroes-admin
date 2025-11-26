@@ -15,6 +15,7 @@ import { TableModule } from 'primeng/table';
 import { BadgeModule } from 'primeng/badge';
 import { catchError, firstValueFrom, interval, of, Subscription, switchMap, tap } from 'rxjs';
 import { SkeletonModule } from 'primeng/skeleton';
+import { PasswordValidators } from '../../shared/password-validators';
 
 @Component({
   selector: 'app-admin-management',
@@ -35,13 +36,15 @@ export class AdminManagementComponent implements OnInit, OnDestroy {
   private timerSub?: Subscription;
   passwordCooldown: string = 'passwordCooldown';
 
-  constructor(public userService: UserService, private router: Router, private fb: FormBuilder, private auth: Auth, private messageService: MessageService) {}
+  defaultTempPassword: string = 'Defau1t_@dmin';
+
+  constructor(public userService: UserService, private router: Router, private fb: FormBuilder, private auth: Auth, private messageService: MessageService, private passwordValidator: PasswordValidators) {}
 
   async ngOnInit() {
     this.createAdminForm = this.fb.group({
       username: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['defau1t_@dmin', [Validators.required]],
+      password: [this.defaultTempPassword, [Validators.required, Validators.minLength(8), this.passwordValidator.digitValidator(), this.passwordValidator.specialCharValidator(), this.passwordValidator.upperLowerValidator()]],
       isSuperadmin: [false],
     });
 
@@ -171,7 +174,7 @@ export class AdminManagementComponent implements OnInit, OnDestroy {
     this.createAdminForm.reset({
       username: '',
       email: '',
-      password: '',
+      password: this.defaultTempPassword,
       isSuperadmin: false,
     });
   }

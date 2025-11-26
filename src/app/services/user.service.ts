@@ -31,13 +31,13 @@ export class UserService {
   private profileSub?: Subscription;
 
   constructor() { 
-    setPersistence(this.auth, browserLocalPersistence)
-    .then(() => {
-      console.log('Firebase Auth persistence set to LOCAL');
-    })
-    .catch(err => {
-      console.error('Error setting persistence: ', err);
-    })
+    // setPersistence(this.auth, browserLocalPersistence)
+    // .then(() => {
+    //   console.log('Firebase Auth persistence set to LOCAL');
+    // })
+    // .catch(err => {
+    //   console.error('Error setting persistence: ', err);
+    // })
 
     onAuthStateChanged(this.auth, (user: User | null) => {
       if (this.profileSub) {

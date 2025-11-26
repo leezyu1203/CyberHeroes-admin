@@ -112,8 +112,20 @@
       <span class="p-text-secondary text-xs font-light">This password is a temporary password. Admin is required to renew password when logged in.</span>
       <input pInputText id="password" formControlName="password" class="w-full" />
       @if (isFieldInvalid('password')) {
-        <span class="text-red-500 text-xs" *ngIf="createAdminForm.get('password')?.errors?.['required']">Password is required</span>
-      } 
+        <span class="text-red-500 text-xs">
+          @if (createAdminForm.get('password')?.hasError('required')) {
+            This field is required
+          } @else if (createAdminForm.get('password')?.hasError('digit')) {
+            Must include at least one digit
+          } @else if (createAdminForm.get('password')?.hasError('upperLower')) {
+            Must include at least one uppercase and one lowercase
+          } @else if (createAdminForm.get('password')?.hasError('specialChar')) {
+            Must include at least one special character (e.g., ! &#64; # $ % ^ & *)
+          } @else if (createAdminForm.get('password')?.hasError('minlength')) {
+            Must be at least 8 characters long
+          }
+        </span>
+      }
     </div>
     <div class="flex flex-row justify-content-between gap-2 mb-4">
       <label for="is_superadmin" class="font-semibold">Super admin</label>
