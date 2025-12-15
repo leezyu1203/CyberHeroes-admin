@@ -346,7 +346,7 @@ export const getAdminList = onCall(async (request) => {
 
   const token = request.auth?.token;
   if (!token?.is_superadmin) {
-    throw new Error("Permission denied: not a superadmin");
+    throw new Error(`Permission denied: ${uid} is not a superadmin`);
   }
 
   try {
@@ -369,7 +369,7 @@ export const createAdmin = onCall(async (request) => {
 
   const token = request.auth?.token;
   if (!token?.is_superadmin) {
-    throw new Error("Permission denied: not a superadmin");
+    throw new Error(`Permission denied: ${uid} is not a superadmin`);
   }
 
   const {password, payload} = request.data;
@@ -423,7 +423,7 @@ export const deleteAdmin = onCall(async (request) => {
 
   const token = request.auth?.token;
   if (!token?.is_superadmin) {
-    throw new Error("Permission denied: not a superadmin");
+    throw new Error(`Permission denied: ${uid} is not a superadmin`);
   }
 
   const {targetUid} = request.data;

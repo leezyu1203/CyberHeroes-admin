@@ -64,7 +64,7 @@ export class UserService {
     const user = credential.user;
 
     if (user) {
-      this.setCustomClaims();
+      await this.setCustomClaims();
       await user.getIdToken(true);
       this.router.navigate(['/verify-email']);
     }
