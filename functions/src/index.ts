@@ -327,6 +327,7 @@ async function applyCustomClaims(uid: string) {
     uid,
     {is_superadmin: isSuperadmin, is_first_login: isFirstLogin}
   );
+  return {isSuperadmin, isFirstLogin};
 }
 
 export const setCustomClaims = onCall(async (request) => {
@@ -335,7 +336,8 @@ export const setCustomClaims = onCall(async (request) => {
     throw new Error("Unauthorized: User must be logged in.");
   }
 
-  await applyCustomClaims(uid);
+  const claimsResult = await applyCustomClaims(uid);
+  return {claimsResult};
 });
 
 export const getAdminList = onCall(async (request) => {

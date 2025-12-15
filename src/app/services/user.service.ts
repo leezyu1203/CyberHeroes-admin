@@ -66,6 +66,7 @@ export class UserService {
     if (user) {
       await this.setCustomClaims();
       await user.getIdToken(true);
+      await new Promise(resolve => setTimeout(resolve, 50));
       this.router.navigate(['/verify-email']);
     }
   }
