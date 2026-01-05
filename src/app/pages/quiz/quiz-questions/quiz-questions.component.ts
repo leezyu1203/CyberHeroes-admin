@@ -15,6 +15,7 @@ import { BadgeModule } from 'primeng/badge';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { ToggleSwitchChangeEvent, ToggleSwitchModule } from 'primeng/toggleswitch';
+import { DialogService } from '../../../service/dialog.service';
 
 @Component({
   selector: 'app-quiz-questions',
@@ -38,7 +39,7 @@ export class QuizQuestionsComponent implements OnInit {
 
   createQuestionForm!: FormGroup;
 
-  constructor(private quizService: QuizService, private route: ActivatedRoute, private router: Router, private messageService: MessageService, private fb: FormBuilder, private cdr: ChangeDetectorRef) {}
+  constructor(private quizService: QuizService, private route: ActivatedRoute, private router: Router, private messageService: MessageService, private fb: FormBuilder, private cdr: ChangeDetectorRef, public dialogService: DialogService) {}
 
   ngOnInit() {
     const levelId = this.route.snapshot.paramMap.get('id');

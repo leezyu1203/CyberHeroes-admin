@@ -6,12 +6,13 @@ import { RouterLink, RouterLinkActive } from "@angular/router";
 import { ButtonModule } from "primeng/button";
 import { UserService } from '../services/user.service';
 import { AsyncPipe, NgIf } from "@angular/common";
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 @Component({
   selector: 'app-layout',
-  imports: [RouterOutlet, Menu, RouterLink, RouterLinkActive, ButtonModule, AsyncPipe, NgIf],
+  imports: [RouterOutlet, Menu, RouterLink, RouterLinkActive, ButtonModule, AsyncPipe, NgIf, ConfirmDialogModule],
   templateUrl: './layout.component.html',
-  styleUrl: './layout.component.scss'
+  styleUrl: './layout.component.scss',
 })
 export class LayoutComponent implements OnInit {
   items: MenuItem[] | undefined;

@@ -12,6 +12,7 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { TableModule } from 'primeng/table';
 import { BadgeModule } from 'primeng/badge';
 import { ToastModule } from 'primeng/toast';
+import { DialogService } from '../../service/dialog.service';
 
 @Component({
   selector: 'app-phish-or-fake',
@@ -31,7 +32,7 @@ export class PhishOrFakeComponent implements OnInit {
   viewingEmail?: Email;
   hasAction: boolean = false;
 
-  constructor(private fb: FormBuilder, private pofService: PhishOrFakeService, private messageService: MessageService, private cdr: ChangeDetectorRef) {}
+  constructor(private fb: FormBuilder, private pofService: PhishOrFakeService, private messageService: MessageService, private cdr: ChangeDetectorRef, public dialogService: DialogService) {}
   
   ngOnInit() {
     this.createEmailForm = this.fb.group({
