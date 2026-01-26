@@ -12,6 +12,7 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { TableModule } from 'primeng/table';
 import { BadgeModule } from 'primeng/badge';
 import { ToastModule } from 'primeng/toast';
+import { DialogService } from '../../service/dialog.service';
 
 @Component({
   selector: 'app-phish-or-fake',
@@ -31,7 +32,7 @@ export class PhishOrFakeComponent implements OnInit {
   viewingEmail?: Email;
   hasAction: boolean = false;
 
-  constructor(private fb: FormBuilder, private pofService: PhishOrFakeService, private messageService: MessageService, private cdr: ChangeDetectorRef) {}
+  constructor(private fb: FormBuilder, private pofService: PhishOrFakeService, private messageService: MessageService, private cdr: ChangeDetectorRef, public dialogService: DialogService) {}
   
   ngOnInit() {
     this.createEmailForm = this.fb.group({
@@ -64,6 +65,7 @@ export class PhishOrFakeComponent implements OnInit {
       return
     }
     this.isFormLoading = true;
+    this.createEmailForm.disable();
     const payload: Email = {
       subject: this.createEmailForm.get('subject')?.value,
       sender: this.createEmailForm.get('senderEmail')?.value,
@@ -81,6 +83,7 @@ export class PhishOrFakeComponent implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
       }
       this.isFormLoading = false;
+      this.createEmailForm.enable();
     }
   }
 
@@ -90,6 +93,7 @@ export class PhishOrFakeComponent implements OnInit {
       return;
     }
     this.isFormLoading = true;
+    this.createEmailForm.disable();
     const payload: Email = {
       subject: this.createEmailForm.get('subject')?.value,
       sender: this.createEmailForm.get('senderEmail')?.value,
@@ -108,6 +112,7 @@ export class PhishOrFakeComponent implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
       }
       this.isFormLoading = false;
+      this.createEmailForm.enable();
     }
   }
 
@@ -152,6 +157,7 @@ export class PhishOrFakeComponent implements OnInit {
     }
     this.visible = !this.visible;
     this.isFormLoading = false;
+    this.createEmailForm.enable();
   }
 
   resetCreateEmailForm() {

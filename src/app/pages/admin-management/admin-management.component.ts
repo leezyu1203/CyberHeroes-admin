@@ -15,6 +15,8 @@ import { TableModule } from 'primeng/table';
 import { BadgeModule } from 'primeng/badge';
 import { catchError, firstValueFrom, interval, of, Subscription, switchMap, tap } from 'rxjs';
 import { SkeletonModule } from 'primeng/skeleton';
+import { PasswordValidators } from '../../shared/password-validators';
+import { DialogService } from '../../service/dialog.service';
 
 @Component({
   selector: 'app-admin-management',
@@ -35,13 +37,15 @@ export class AdminManagementComponent implements OnInit, OnDestroy {
   private timerSub?: Subscription;
   passwordCooldown: string = 'passwordCooldown';
 
-  constructor(public userService: UserService, private router: Router, private fb: FormBuilder, private auth: Auth, private messageService: MessageService) {}
+  defaultTempPassword: string = 'Defau1t_@dmin';
+
+  constructor(public userService: UserService, private router: Router, private fb: FormBuilder, private auth: Auth, private messageService: MessageService, private passwordValidator: PasswordValidators, public dialogService: DialogService) {}
 
   async ngOnInit() {
     this.createAdminForm = this.fb.group({
       username: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required]],
+      password: [this.defaultTempPassword, [Validators.required, Validators.minLength(8), this.passwordValidator.digitValidator(), this.passwordValidator.specialCharValidator(), this.passwordValidator.upperLowerValidator()]],
       isSuperadmin: [false],
     });
 
@@ -93,6 +97,7 @@ export class AdminManagementComponent implements OnInit, OnDestroy {
       return;
     }
     this.isFormLoading = true;
+    this.createAdminForm.disable();
     const payload: Admin = {
       username: this.createAdminForm.get('username')?.value,
       email: this.createAdminForm.get('email')?.value,
@@ -109,6 +114,7 @@ export class AdminManagementComponent implements OnInit, OnDestroy {
         this.toggleCreateAdminDialogVisibility();
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'New admin created!', life: 3000 });
         this.isFormLoading = false;
+        this.createAdminForm.enable();
       }), 
       catchError((err) => {
         if (err instanceof Error) {
@@ -117,6 +123,7 @@ export class AdminManagementComponent implements OnInit, OnDestroy {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
         }
         this.isFormLoading = false;
+        this.createAdminForm.enable();
         return of(null);
       })
     ).subscribe();
@@ -168,7 +175,7 @@ export class AdminManagementComponent implements OnInit, OnDestroy {
     this.createAdminForm.reset({
       username: '',
       email: '',
-      password: '',
+      password: this.defaultTempPassword,
       isSuperadmin: false,
     });
   }

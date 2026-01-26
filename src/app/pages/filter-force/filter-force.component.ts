@@ -10,7 +10,8 @@ import { TableModule } from 'primeng/table';
 import { BadgeModule } from 'primeng/badge';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-import { SkeletonModule } from 'primeng/skeleton'
+import { SkeletonModule } from 'primeng/skeleton';
+import { DialogService } from '../../service/dialog.service';
 
 @Component({
   selector: 'app-filter-force',
@@ -28,7 +29,7 @@ export class FilterForceComponent implements OnInit {
   messages: Message[] = [] ;
   hasAction: boolean = false;
 
-  constructor(private fb: FormBuilder, private ffService: FilterForceService, private messageService: MessageService, private cdr: ChangeDetectorRef) {}
+  constructor(private fb: FormBuilder, private ffService: FilterForceService, private messageService: MessageService, private cdr: ChangeDetectorRef, public dialogService: DialogService) {}
 
   ngOnInit() {
     this.createMessageForm = this.fb.group({
@@ -61,6 +62,7 @@ export class FilterForceComponent implements OnInit {
       return;
     }
     this.isFormLoading = true;
+    this.createMessageForm.disable();
     const payload: Message = {
       message: this.createMessageForm.get('message')?.value,
       is_danger: this.createMessageForm.get('isDanger')?.value,
@@ -76,6 +78,7 @@ export class FilterForceComponent implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
       }
       this.isFormLoading = false;
+      this.createMessageForm.enable();
     }
   }
 
@@ -85,6 +88,7 @@ export class FilterForceComponent implements OnInit {
       return;
     }
     this.isFormLoading = true;
+    this.createMessageForm.disable();
     const payload: Message = {
       message: this.createMessageForm.get('message')?.value,
       is_danger: this.createMessageForm.get('isDanger')?.value,
@@ -101,6 +105,7 @@ export class FilterForceComponent implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: String(err), life: 3000 });
       }
       this.isFormLoading = false;
+      this.createMessageForm.enable();
     }
   }
 
@@ -138,6 +143,7 @@ export class FilterForceComponent implements OnInit {
     }
     this.visible = !this.visible;
     this.isFormLoading = false;
+    this.createMessageForm.enable();
   }
 
   resetCreateMessageForm() {

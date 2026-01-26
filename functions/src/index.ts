@@ -153,16 +153,17 @@ export const createQuizQuestion = onCall(async (request) => {
     batch.set(questionRef, {
       question: payload.question,
       explanation: payload.explanation,
-      createdBy: uid,
-      createdAt: now,
+      is_deleted: false,
+      created_by: uid,
+      created_at: now,
     });
     for (const a of payload.answers) {
       const ansRef = questionRef.collection(answersCollection).doc();
       batch.set(ansRef, {
         answer: a.answer,
         is_true: a.is_true,
-        createdBy: uid,
-        createdAt: now,
+        created_by: uid,
+        created_at: now,
       });
     }
 
@@ -211,8 +212,8 @@ export const updateQuizQuestion = onCall(async (request) => {
     batch.update(questionRef, {
       question: payload.question,
       explanation: payload.explanation,
-      updatedBy: uid,
-      updatedAt: now,
+      updated_by: uid,
+      updated_at: now,
     });
     const answerSnap = await questionRef.collection(answersCollection).get();
     answerSnap.forEach((doc) => {
@@ -223,8 +224,8 @@ export const updateQuizQuestion = onCall(async (request) => {
       batch.set(ansRef, {
         answer: a.answer,
         is_true: a.is_true,
-        updatedBy: uid,
-        updatedAt: now,
+        updated_by: uid,
+        updated_at: now,
       });
     }
 
@@ -260,7 +261,8 @@ export const deleteQuizQuestion = onCall(async (request) => {
   }
 
   const questionNum = levelSnap.get("question_num");
-  const questionsSnap = await levelRef.collection(questionsCollection).get();
+  const questionsSnap = await levelRef.collection(questionsCollection)
+    .where("is_deleted", "!=", true).get();
   const totalQuestions = questionsSnap.size;
   if (totalQuestions <= questionNum) {
     throw new Error(
@@ -268,7 +270,10 @@ export const deleteQuizQuestion = onCall(async (request) => {
     );
   }
 
-  await levelRef.collection(questionsCollection).doc(questionId).delete();
+  await levelRef.collection(questionsCollection).doc(questionId).update({
+    is_deleted: true,
+    deleted_at: Timestamp.now(),
+  });
   logger.info(`Level ${levelId}, Question ${questionId} deleted by ${uid}`);
 
   return {status: "ok", message: "Question deleted successfully"};
@@ -301,6 +306,11 @@ export const deleteRevisionKeyPoint = onCall(async (request) => {
 });
 
 const adminCollection = "admins";
+const usersCollection = "users";
+const unlockedQuizzesSubcollection = "unlocked_quizzes";
+const unlockedChaptersSubcollection = "unlocked_chapters";
+const firstQuizLevelId = "QL001";
+const firstChapterId = "SC001";
 
 /**
  * Help to apply custom claims to auth token
@@ -317,6 +327,7 @@ async function applyCustomClaims(uid: string) {
     uid,
     {is_superadmin: isSuperadmin, is_first_login: isFirstLogin}
   );
+  return {isSuperadmin, isFirstLogin};
 }
 
 export const setCustomClaims = onCall(async (request) => {
@@ -325,7 +336,8 @@ export const setCustomClaims = onCall(async (request) => {
     throw new Error("Unauthorized: User must be logged in.");
   }
 
-  await applyCustomClaims(uid);
+  const claimsResult = await applyCustomClaims(uid);
+  return {claimsResult};
 });
 
 export const getAdminList = onCall(async (request) => {
@@ -336,7 +348,7 @@ export const getAdminList = onCall(async (request) => {
 
   const token = request.auth?.token;
   if (!token?.is_superadmin) {
-    throw new Error("Permission denied: not a superadmin");
+    throw new Error(`Permission denied: ${uid} is not a superadmin`);
   }
 
   try {
@@ -359,7 +371,7 @@ export const createAdmin = onCall(async (request) => {
 
   const token = request.auth?.token;
   if (!token?.is_superadmin) {
-    throw new Error("Permission denied: not a superadmin");
+    throw new Error(`Permission denied: ${uid} is not a superadmin`);
   }
 
   const {password, payload} = request.data;
@@ -380,12 +392,28 @@ export const createAdmin = onCall(async (request) => {
       disabled: payload.disabled,
       failed_attempts: payload.failed_attempts,
       is_first_login: payload.is_first_login,
-      createdBy: uid,
-      createdAt: Timestamp.now(),
+      created_by: uid,
+      created_at: Timestamp.now(),
     });
+    await db.collection(usersCollection).doc(newUser.uid).set({
+      uid: newUser.uid,
+      username: payload.username,
+      email: payload.email,
+      register_date: Timestamp.now(),
+      streak_day: 0,
+    });
+    const userDocRef = db.collection(usersCollection).doc(newUser.uid);
+    await userDocRef.collection(unlockedQuizzesSubcollection)
+      .doc(firstQuizLevelId).set({
+        unlocked_at: Timestamp.now(),
+      });
+    await userDocRef.collection(unlockedChaptersSubcollection)
+      .doc(firstChapterId).set({
+        unlocked_at: Timestamp.now(),
+      });
     return {status: "ok", message: "Admin account created.", uid: uid};
   } catch (err) {
-    throw new Error("Failed to create admin");
+    throw new Error(`Failed to create admin ${err}`);
   }
 });
 
@@ -397,7 +425,7 @@ export const deleteAdmin = onCall(async (request) => {
 
   const token = request.auth?.token;
   if (!token?.is_superadmin) {
-    throw new Error("Permission denied: not a superadmin");
+    throw new Error(`Permission denied: ${uid} is not a superadmin`);
   }
 
   const {targetUid} = request.data;
@@ -410,7 +438,25 @@ export const deleteAdmin = onCall(async (request) => {
 
   try {
     await db.collection(adminCollection).doc(targetUid).delete();
+    await db.collection(usersCollection).doc(targetUid).delete();
     await admin.auth().deleteUser(targetUid);
+
+    const friendsRef = db.collection("friends");
+    const query1 = friendsRef.where("user_1", "==", targetUid);
+    const query2 = friendsRef.where("user_2", "==", targetUid);
+    const [snap1, snap2] = await Promise.all([query1.get(), query2.get()]);
+    const friendDocs = [...snap1.docs, ...snap2.docs];
+    for (const doc of friendDocs) {
+      await doc.ref.delete();
+    }
+
+    const quizAttemptsRef = db.collection("quiz_attempts");
+    const attemptsSnap = await quizAttemptsRef.where("user_id", "==", targetUid)
+      .get();
+    for (const doc of attemptsSnap.docs) {
+      await doc.ref.delete();
+    }
+
     logger.info(`User admin ${targetUid} deleted by ${uid}`);
     return {
       status: "ok",
@@ -436,14 +482,19 @@ export const updatePassword = onCall(async (request) => {
     await admin.auth().updateUser(uid, {password: password});
 
     const token = request.auth?.token;
+    const docRef = await db.collection(adminCollection).doc(uid);
     if (token?.is_first_login) {
-      const docRef = await db.collection(adminCollection).doc(uid);
       await docRef.update({
         is_first_login: false,
-        updatedAt: Timestamp.now(),
-        updatedBy: uid,
+        updated_at: Timestamp.now(),
+        updated_by: uid,
       });
       await applyCustomClaims(uid);
+    } else {
+      await docRef.update({
+        updated_at: Timestamp.now(),
+        updated_by: uid,
+      });
     }
     logger.info(`User admin ${uid} updated password`);
     return {status: "ok", message: "Password updated successfully"};
@@ -474,6 +525,32 @@ export const checkAdminEmailExists = onCall(async (request) => {
       };
     }
     logger.error("Error checkAdminEmailExists: ", error);
+    throw new HttpsError("internal", "Failed to check user existence");
+  }
+});
+
+export const checkEmailExists = onCall(async (request) => {
+  const {email} = request.data;
+
+  if (!email || typeof email !== "string") {
+    throw new HttpsError("invalid-argument", "Email address is required");
+  }
+
+  try {
+    await getAuth().getUserByEmail(email);
+    logger.info(`Successfully searched user with email address ${email}`);
+    return {
+      status: "ok", message: "The email address is existed", exists: true,
+    };
+  } catch (error: any) {
+    if (error.code === "auth/user-not-found") {
+      return {
+        status: "ok",
+        message: "The email address is not existed",
+        exists: false,
+      };
+    }
+    logger.error("Error checkEmailExists: ", error);
     throw new HttpsError("internal", "Failed to check user existence");
   }
 });

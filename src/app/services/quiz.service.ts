@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { collection, collectionData, CollectionReference, doc, docData, DocumentData, Firestore, getDoc, serverTimestamp, updateDoc } from '@angular/fire/firestore';
+import { collection, collectionData, CollectionReference, doc, docData, DocumentData, Firestore, getDoc, query, serverTimestamp, updateDoc, where } from '@angular/fire/firestore';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { from, Observable } from 'rxjs';
 
@@ -52,7 +52,8 @@ export class QuizService {
 
   getQuestions(levelId: string): Observable<QuizQuestion[]> {
     const questionsRef = collection(this.firestore, `${this.levelsCollection}/${levelId}/${this.questionsCollection}`);
-    return collectionData(questionsRef, { idField: 'id' }) as Observable<QuizQuestion[]>;
+    const q = query(questionsRef, where('is_deleted', '!=', true));
+    return collectionData(q, { idField: 'id' }) as Observable<QuizQuestion[]>;
   }
 
   getQuesAnswers(levelId: string, questionId: string): Observable<QuizAnswer[]> {

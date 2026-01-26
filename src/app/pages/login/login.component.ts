@@ -45,14 +45,15 @@ export class LoginComponent {
     this.loginForm.disable();
     const { email, password } = this.loginForm.value;
     try {
-      await signInWithEmailAndPassword(this.auth, email, password);
-      const user = await this.auth.currentUser;
-      if (user) {
-        await this.userService.setCustomClaims();
-        await user.getIdToken(true);
-        this.router.navigate(['/verify-email']);
-        // console.log((await user.getIdTokenResult()).claims['is_first_login']);
-      }
+      await this.userService.login(email, password);
+      // await signInWithEmailAndPassword(this.auth, email, password);
+      // const user = await this.auth.currentUser;
+      // if (user) {
+      //   await this.userService.setCustomClaims();
+      //   await user.getIdToken(true);
+      //   this.router.navigate(['/verify-email']);
+      //   // console.log((await user.getIdTokenResult()).claims['is_first_login']);
+      // }
       // alert('Login successfull!');
     } catch (err: any) {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message, life: 3000 });

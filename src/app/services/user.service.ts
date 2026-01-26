@@ -1,8 +1,10 @@
 import { inject, Injectable } from '@angular/core';
-import { Auth, onAuthStateChanged, sendEmailVerification, signOut, User, reload, sendPasswordResetEmail } from '@angular/fire/auth';
+import { Auth, onAuthStateChanged, sendEmailVerification, signOut, User, reload, sendPasswordResetEmail, signInWithEmailAndPassword } from '@angular/fire/auth';
 import { Firestore, doc, docData} from '@angular/fire/firestore';
 import { Functions, httpsCallable } from '@angular/fire/functions';
-import { BehaviorSubject, firstValueFrom, from, map, Observable, switchMap, throwError } from 'rxjs';
+import { Router } from '@angular/router';
+import { browserLocalPersistence, setPersistence } from 'firebase/auth';
+import { BehaviorSubject, firstValueFrom, from, map, Observable, Subscription, switchMap, throwError } from 'rxjs';
 
 export interface Admin {
   uid?: string;
@@ -21,15 +23,31 @@ export class UserService {
   private auth = inject(Auth);
   private firestore = inject(Firestore);
   private functions = inject(Functions);
+  private router = inject(Router);
 
   private userSubject = new BehaviorSubject<any>(null);
   currentUser$ = this.userSubject.asObservable();
 
+  private profileSub?: Subscription;
+
   constructor() { 
+    // setPersistence(this.auth, browserLocalPersistence)
+    // .then(() => {
+    //   console.log('Firebase Auth persistence set to LOCAL');
+    // })
+    // .catch(err => {
+    //   console.error('Error setting persistence: ', err);
+    // })
+
     onAuthStateChanged(this.auth, (user: User | null) => {
+      if (this.profileSub) {
+        this.profileSub.unsubscribe();
+        this.profileSub = undefined;
+      }
+
       if (user) {
         const userDocRef = doc(this.firestore, 'admins', user.uid);
-        docData(userDocRef, { idField: 'uid' }).subscribe(profile => {
+        this.profileSub = docData(userDocRef, { idField: 'uid' }).subscribe(profile => {
           this.userSubject.next({
             firebaseUser: user,
             ...profile
@@ -41,8 +59,21 @@ export class UserService {
     });
   }
 
+  async login(email: string, password: string): Promise<void> {
+    const credential = await signInWithEmailAndPassword(this.auth, email, password);
+    const user = credential.user;
+
+    if (user) {
+      await this.setCustomClaims();
+      await user.getIdToken(true);
+      await new Promise(resolve => setTimeout(resolve, 50));
+      this.router.navigate(['/verify-email']);
+    }
+  }
+
   async logout(): Promise<void> {
     await signOut(this.auth);
+    this.userSubject.next(null);
   }
 
   async setCustomClaims() {

@@ -46,7 +46,7 @@
                 severity="danger"
                 size="small"
                 [disabled]="keyPoints.length <= 1 || hasAction"
-                (onClick)="onDeleteKeyPoints(i)"
+                (onClick)="dialogService.openConfirmDeleteDialog(onDeleteKeyPoints.bind(this, i))"
               ></p-button>
             </div>
           </div>

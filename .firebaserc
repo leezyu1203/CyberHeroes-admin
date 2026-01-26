@@ -1,5 +1,16 @@
 {
   "projects": {
-    "default": "cyberheroes-fdc8d"
-  }
+    "default": "cyberheroes-fdc8d",
+    "production": "cyberheroes-fdc8d"
+  },
+  "targets": {
+    "cyberheroes-fdc8d": {
+      "hosting": {
+        "angular_app": [
+          "cyberheroes-admin"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

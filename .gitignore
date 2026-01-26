@@ -43,7 +43,11 @@ Thumbs.db
 
 # Firebase emulator data
 .firebase/
+.firebaseignore
 
 # Logs
 debug.log
 firebase-debug.log*
+firestore-debug.log*
+
+src/app/firebase.config.ts

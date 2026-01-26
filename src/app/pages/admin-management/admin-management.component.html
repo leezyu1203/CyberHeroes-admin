@@ -76,7 +76,7 @@
           <td>
             <span class="flex flex-row gap-2">
               <!-- <p-button icon="pi pi-file-edit" [rounded]="true" [outlined]="true" size="small" (onClick)="onEditState(rowIndex)"></p-button> -->
-              <p-button icon="pi pi-trash" [rounded]="true" [outlined]="true" severity="danger" size="small" (onClick)="onDeleteAdmin(admin.uid)" [disabled]="hasAction" *ngIf="user.uid !== admin.uid"></p-button>
+              <p-button icon="pi pi-trash" [rounded]="true" [outlined]="true" severity="danger" size="small" (onClick)="dialogService.openConfirmDeleteDialog(onDeleteAdmin.bind(this, admin.uid))" [disabled]="hasAction" *ngIf="user.uid !== admin.uid"></p-button>
             </span>
           </td>
         </tr>
@@ -94,14 +94,14 @@
   <form [formGroup]="createAdminForm" (ngSubmit)="onCreateAdmin()"> 
     <div class="flex flex-column align-items-start gap-1 mb-4">
       <label for="username" class="font-semibold">Username</label>
-      <input pInputText id="username" formControlName="username" class="w-full" [disabled]="isFormLoading" />
+      <input pInputText id="username" formControlName="username" class="w-full" />
       @if (isFieldInvalid('username')) {
         <span class="text-red-500 text-xs" *ngIf="createAdminForm.get('username')?.errors?.['required']">Username is required</span>
       } 
     </div>
     <div class="flex flex-column align-items-start gap-1 mb-4">
       <label for="email" class="font-semibold">Email</label>
-      <input pInputText id="email" formControlName="email" class="w-full" [disabled]="isFormLoading" />
+      <input pInputText id="email" formControlName="email" class="w-full" />
       @if (isFieldInvalid('email')) {
         <span class="text-red-500 text-xs" *ngIf="createAdminForm.get('email')?.errors?.['required']">Email is required</span>
         <span class="text-red-500 text-xs" *ngIf="createAdminForm.get('email')?.errors?.['email']">Invalid email</span>
@@ -110,14 +110,26 @@
     <div class="flex flex-column align-items-start gap-1 mb-4">
       <label for="password" class="font-semibold">Password</label>
       <span class="p-text-secondary text-xs font-light">This password is a temporary password. Admin is required to renew password when logged in.</span>
-      <input pInputText id="password" formControlName="password" class="w-full" [disabled]="isFormLoading" />
+      <input pInputText id="password" formControlName="password" class="w-full" />
       @if (isFieldInvalid('password')) {
-        <span class="text-red-500 text-xs" *ngIf="createAdminForm.get('password')?.errors?.['required']">Password is required</span>
-      } 
+        <span class="text-red-500 text-xs">
+          @if (createAdminForm.get('password')?.hasError('required')) {
+            This field is required
+          } @else if (createAdminForm.get('password')?.hasError('digit')) {
+            Must include at least one digit
+          } @else if (createAdminForm.get('password')?.hasError('upperLower')) {
+            Must include at least one uppercase and one lowercase
+          } @else if (createAdminForm.get('password')?.hasError('specialChar')) {
+            Must include at least one special character (e.g., ! &#64; # $ % ^ & *)
+          } @else if (createAdminForm.get('password')?.hasError('minlength')) {
+            Must be at least 8 characters long
+          }
+        </span>
+      }
     </div>
     <div class="flex flex-row justify-content-between gap-2 mb-4">
       <label for="is_superadmin" class="font-semibold">Super admin</label>
-      <p-toggleswitch id="is_superadmin" formControlName="isSuperadmin" [disabled]="isFormLoading"></p-toggleswitch>
+      <p-toggleswitch id="is_superadmin" formControlName="isSuperadmin" ></p-toggleswitch>
     </div>
     <div class="flex justify-content-end gap-2">
         <p-button label="Cancel" severity="secondary" (click)="toggleCreateAdminDialogVisibility()" [disabled]="isFormLoading" />

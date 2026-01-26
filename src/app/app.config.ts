@@ -11,6 +11,7 @@ import { getFunctions, provideFunctions } from '@angular/fire/functions';
 import { firebaseConfig } from './firebase.config';
 
 import { routes } from './app.routes';
+import { ConfirmationService } from 'primeng/api';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -18,6 +19,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     providePrimeNG({ theme: { preset: Aura } }),
     provideAnimations(),
+    ConfirmationService,
 
     // Firebase
     provideFirebaseApp(() => initializeApp(firebaseConfig)),

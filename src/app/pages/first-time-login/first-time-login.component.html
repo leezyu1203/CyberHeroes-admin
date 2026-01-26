@@ -63,9 +63,9 @@
 
           <div class="flex justify-content-between mt-4 text-sm">
             <p-button label="Not ready yet? Try later." [link]="true" size="small" (onClick)="onLogout()" [disabled]="isLoading" />
-            <button pButton size="small" (click)="onSendVerificationEmail()" [disabled]="isVerifyDisable || isLoading">
+            <!-- <button pButton size="small" (click)="onSendVerificationEmail()" [disabled]="isVerifyDisable || isLoading">
               <span pButtonLabel>Resend verification email @if (countdown > 0) { ({{ countdown }}) }</span>
-            </button>
+            </button> -->
           </div>
 
           <div class="flex justify-content-center mt-3">

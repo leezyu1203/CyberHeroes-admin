@@ -9,6 +9,7 @@ import { AccordionModule } from 'primeng/accordion';
 import { DialogModule } from 'primeng/dialog';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InputTextModule } from "primeng/inputtext";
+import { DialogService } from '../../service/dialog.service';
 
 @Component({
   selector: 'app-revision-key-points',
@@ -26,7 +27,7 @@ export class RevisionKeyPointsComponent implements OnInit {
   createKeyPointForm!: FormGroup;
   hasAction: boolean = false;
 
-  constructor(private rkpService: RevisionKeyPointsService, private messageService: MessageService, private cdr: ChangeDetectorRef, private fb: FormBuilder) { }
+  constructor(private rkpService: RevisionKeyPointsService, private messageService: MessageService, private cdr: ChangeDetectorRef, private fb: FormBuilder, public dialogService: DialogService) { }
 
   ngOnInit(): void {
     this.isLoading = true;
